@@ -1,0 +1,10 @@
+# Ignore Python virtual environments
+env/
+.venv/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db

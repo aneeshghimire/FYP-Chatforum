@@ -1,0 +1,26 @@
+# Django environment variables
+.env
+
+# Django migrations
+**/migrations/
+
+# Database files
+*.sqlite3
+*.db
+
+# Static and media files (if you generate these locally)
+static/
+media/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# VS Code workspace files
+.vscode/
+
+# MacOS-specific files
+.DS_Store
+
+# Ignore any other unnecessary files
+*.log
