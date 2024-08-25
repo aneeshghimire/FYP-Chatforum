@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 
+
 @api_view(['POST'])
 def register(request):
     if  request.method== 'POST':
@@ -30,10 +31,12 @@ def signin(request):
     print(f"Session key before login: {request.session.session_key}")
     if request.method== 'POST':
         print(request.data)
-        user = User.objects.get(email=request.data['email'])
-        # loginserializer= UserSerializer(data=request.data)
-        if not user:
-            return JsonResponse({'status':'error', 'message':"User doesn't exist"})
+        try:
+            # Try to retrieve the user by email
+            user = User.objects.get(email=request.data['email'])
+        except User.DoesNotExist:
+            # No user with this email exists
+            return JsonResponse({'status': 'error', 'message': "User doesn't exist"})
 
         # username= request.data['username']
         password= request.data['password']
