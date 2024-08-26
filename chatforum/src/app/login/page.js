@@ -25,7 +25,13 @@ export default function LoginPage() {
         withCredentials: true,
       }
     );
-    if (response.data.status == "successful") {
+    console.log(response);
+    if (
+      response.data.status == "successful" &&
+      response.data.hasUserProfilePicture == true
+    ) {
+      router.push("/userdashboard");
+    } else if (response.data.status == "successful") {
       router.push("/uploadprofilepicture");
     } else if (response.data.status == "error") {
       toast.error("Email or Password don't match", {

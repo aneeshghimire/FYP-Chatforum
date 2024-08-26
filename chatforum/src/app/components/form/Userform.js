@@ -31,7 +31,7 @@ export default function Userform() {
       
       );
       if (response.data.status == "successful") {
-        router.push("/hello");
+        router.push("/login");
       }
       console.log(response);
     } catch (err) {

@@ -4,10 +4,8 @@ from django.contrib.auth.models import User,AnonymousUser
 from .serializers import UserSerializer,UserProfileSerializer
 from rest_framework import status
 from .models import UserProfile
-from rest_framework.parsers import MultiPartParser
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
-from django.middleware.csrf import get_token
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
@@ -42,11 +40,13 @@ def signin(request):
         password= request.data['password']
 
         user= authenticate(username=user.username,password=password)
-        
+        hasUserProfile= False
+        if(user.userprofile):
+            hasUserProfile=True
         
         if user:
             login(request,user)
-            response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Sucesful'})
+            response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Succesful','hasUserProfilePicture':hasUserProfile})
             print(f"Session key after login: {request.session.session_key}")
             print(f"Session data: {request.session.items()}")
             return response
