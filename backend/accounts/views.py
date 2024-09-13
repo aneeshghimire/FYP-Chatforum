@@ -1,8 +1,7 @@
 from django.http import JsonResponse
-from rest_framework.decorators import api_view,parser_classes
+from rest_framework.decorators import api_view
 from django.contrib.auth.models import User,AnonymousUser
 from .serializers import UserSerializer,UserProfileSerializer
-from rest_framework import status
 from .models import UserProfile
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
@@ -41,11 +40,11 @@ def signin(request):
 
         user= authenticate(username=user.username,password=password)
         hasUserProfile= False
-        if(user.userprofile):
-            hasUserProfile=True
         
         if user:
-            login(request,user)
+            if hasattr(user, 'userprofile'):
+                hasUserProfile = True
+            login(request,user)  
             response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Succesful','hasUserProfilePicture':hasUserProfile})
             print(f"Session key after login: {request.session.session_key}")
             print(f"Session data: {request.session.items()}")

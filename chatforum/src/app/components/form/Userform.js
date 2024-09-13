@@ -25,10 +25,6 @@ export default function Userform() {
       const response = await axios.post(
         "http://localhost:8000/api/register/",
         userDetails,
-        {
-          withCredentials: true,
-        }
-      
       );
       if (response.data.status == "successful") {
         router.push("/login");

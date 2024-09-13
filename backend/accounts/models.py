@@ -19,19 +19,21 @@ class UserProfile(models.Model):
             # Resize the image to a fixed size while maintaining aspect ratio
             img = ImageOps.fit(img, (200, 200), Image.Resampling.LANCZOS)
 
-            # Save the image with high quality
+            # Save the image as PNG
             output = BytesIO()
-            img.save(output, format='JPEG', quality=95)
+            img.save(output, format='PNG')  # Save as PNG
             output.seek(0)
 
             # Replace the existing image with the processed one
             self.profile_picture = InMemoryUploadedFile(
                 output, 
                 'ImageField', 
-                f"{self.profile_picture.name.split('.')[0]}.jpg", 
-                'image/jpeg', 
+                f"{self.profile_picture.name.split('.')[0]}.png",  # Use .png extension
+                'image/png', 
                 output.getbuffer().nbytes, 
                 None
             )
 
         super().save(*args, **kwargs)
+
+

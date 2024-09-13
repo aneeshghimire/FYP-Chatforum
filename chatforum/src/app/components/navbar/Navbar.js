@@ -1,40 +1,38 @@
 import React from "react";
 import Link from "next/link";
-export default function Navbar() {
+import { FaUsers, FaSignOutAlt, FaClipboardList } from "react-icons/fa";
+export default function Navbar({handlelogout}) {
   return (
-    <div>
-      <nav className="bg-purple-700 p-4 flex justify-between items-center shadow-lg">
-        <Link href={'/'}>
-          <div className="flex items-center space-x-4">
-            <img
-              src="/logo/logo.png"
-              alt="ChatForum Logo"
-              className="w-12 h-12"
-            />
-            <span className="text-xl font-bold">ChatForum</span>
-          </div>
-        </Link>
-        <div className="space-x-6">
-          <Link
-            href="/rooms"
-            className="hover:text-gray-300 transition duration-200"
-          >
-            Rooms
-          </Link>
-          <Link
-            href="/threads"
-            className="hover:text-gray-300 transition duration-200"
-          >
-            Joined Threads
-          </Link>
-          <Link
-            href="/logout"
-            className="hover:text-gray-300 transition duration-200"
-          >
-            Logout
-          </Link>
+    <div className="w-full md:w-64 md:min-w-64 bg-gradient-to-b from-indigo-600 to-purple-600 text-white p-6 flex flex-col ">
+        <div className="text-center mb-12 flex gap-x-3 items-center">
+          <img src="/logo/logo.png" className=" w-14 h-14" alt="" />
+          <h1 className="text-xl md:text-2xl font-bold">ChatForum</h1>
         </div>
-      </nav>
-    </div>
+        <nav>
+          <ul className="space-y-4">
+            <li>
+              <Link
+                className="flex items-center text-base md:text-lg font-semibold hover:text-indigo-300 transition"
+                href={"/rooms"}
+              >
+                <FaClipboardList className="mr-3" /> Rooms
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="flex items-center text-base md:text-lg font-semibold hover:text-indigo-300 transition"
+                href={"/JoinedThreads"}
+              >
+                <FaUsers className="mr-3" /> Joined Threads
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="mt-auto">
+          <button className="flex items-center text-base md:text-lg font-semibold hover:text-red-300 transition" onClick={handlelogout}>
+            <FaSignOutAlt className="mr-3" /> Logout
+          </button>
+        </div>
+      </div>
   );
 }

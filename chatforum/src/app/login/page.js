@@ -5,9 +5,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Discuss } from 'react-loader-spinner'
 
 export default function LoginPage() {
   const router = useRouter();
+  const[isLoading,setIsLoading]=useState(false)
   const [userDetails, setUserDetails] = useState({ email: "", password: "" });
 
   const handleChange = (event) => {
@@ -17,7 +19,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true)
     // let csrftoken= await getcsrftoken()
+    try{
     const response = await axios.post(
       "http://localhost:8000/api/signin/",
       userDetails,
@@ -43,6 +47,12 @@ export default function LoginPage() {
         draggable: false,
       });
     }
+  }catch(err){
+    console.log(err.message)
+  }
+  finally{
+    setIsLoading(false)
+  }
 
     // Implement login logic here
     console.log("Logging in with:", userDetails);
@@ -56,6 +66,7 @@ export default function LoginPage() {
 
       {/* Login Form */}
       <div className="relative z-10 bg-white p-10 rounded-lg shadow-lg w-full max-w-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+        {isLoading && <Discuss color="purple"/>}
         <div className="flex justify-center mb-6">
           <img
             src="/logo/logo.png"
