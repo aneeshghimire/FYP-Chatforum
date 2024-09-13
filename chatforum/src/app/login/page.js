@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // let csrftoken= await getcsrftoken()
+
     const response = await axios.post(
       "http://localhost:8000/api/signin/",
       userDetails,

@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from django.contrib.sessions.models import Session
+
 from rest_framework.decorators import api_view,parser_classes
 from django.contrib.auth.models import User,AnonymousUser
 from .serializers import UserSerializer,UserProfileSerializer
@@ -26,33 +28,32 @@ def register(request):
 
 @api_view(['POST'])
 def signin(request):
-    print(f"Session key before login: {request.session.session_key}")
-    if request.method== 'POST':
-        print(request.data)
-        try:
-            # Try to retrieve the user by email
-            user = User.objects.get(email=request.data['email'])
-        except User.DoesNotExist:
-            # No user with this email exists
-            return JsonResponse({'status': 'error', 'message': "User doesn't exist"})
+            print(f"Session key before login: {request.session.session_key}")
+            if request.method== 'POST':
+                    print(request.data)
+                    try:
+                        # Try to retrieve the user by email
+                        user = User.objects.get(email=request.data['email'])
+                    except User.DoesNotExist:
+                        # No user with this email exists
+                        return JsonResponse({'status': 'error', 'message': "User doesn't exist"})
 
-        # username= request.data['username']
-        password= request.data['password']
+                    # username= request.data['username']
+                    password= request.data['password']
 
-        user= authenticate(username=user.username,password=password)
-        hasUserProfile= False
-        if(user.userprofile):
-            hasUserProfile=True
-        
-        if user:
-            login(request,user)
-            response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Succesful','hasUserProfilePicture':hasUserProfile})
-            print(f"Session key after login: {request.session.session_key}")
-            print(f"Session data: {request.session.items()}")
-            return response
-        else:
-            return JsonResponse({'status':'error','message':"Login not Succesful"})
-
+                    user= authenticate(username=user.username,password=password)
+                    hasUserProfile= False
+                    
+                    if user:
+                        if hasattr(user, 'userprofile'):
+                            hasUserProfile = True
+                        login(request,user)  
+                        response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Succesful','hasUserProfilePicture':hasUserProfile})
+                        print(f"Session key after login: {request.session.session_key}")
+                        print(f"Session data: {request.session.items()}")
+                        return response
+                    else:
+                        return JsonResponse({'status':'error','message':"Login not Succesful"})
 
 @api_view(['POST'])
 def uploadprofilepicture(request):
@@ -82,3 +83,9 @@ def get_user_profile(request):
         "profile":profile_serializer.data
     }
     return JsonResponse(data)
+
+
+
+
+
+    

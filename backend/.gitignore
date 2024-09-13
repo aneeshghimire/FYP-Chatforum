@@ -1,6 +1,6 @@
 # Django environment variables
 .env
-
+venv/
 # Django migrations
 **/migrations/
 

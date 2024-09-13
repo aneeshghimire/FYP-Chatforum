@@ -16,10 +16,10 @@ export default function UserDashboard() {
     getUserProfile();
   }, []);
 
-  const handlelogout=async ()=>{
+  const handlelogout = async () => {
     const response = await axios.get('/api/logout');
     console.log(response)
-    if(response.data.status=="successful"){
+    if (response.data.status == "successful") {
       router.push('/')
     }
   }
@@ -48,10 +48,10 @@ export default function UserDashboard() {
           <h1 className="text-xl md:text-2xl font-bold">ChatForum</h1>
         </div>
         <nav>
-          <ul className="space-y-4">
+          <ul className="flex flex-col gap-y-4">
             <li>
               <Link
-                className="flex items-center text-base md:text-lg font-semibold hover:text-indigo-300 transition"
+                className="flex items-center text-base md:text-lg font-semibold hover:text-black hover:scale-105 transition"
                 href={"/rooms"}
               >
                 <FaClipboardList className="mr-3" /> Rooms
@@ -59,7 +59,7 @@ export default function UserDashboard() {
             </li>
             <li>
               <Link
-                className="flex items-center text-base md:text-lg font-semibold hover:text-indigo-300 transition"
+                className="flex items-center text-base md:text-lg font-semibold hover:text-black hover:scale-105 transition"
                 href={"/JoinedThreads"}
               >
                 <FaUsers className="mr-3" /> Joined Threads

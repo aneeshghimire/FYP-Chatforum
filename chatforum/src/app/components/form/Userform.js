@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import getcsrftoken from "@/helpers/getcsrftoken";
 
 export default function Userform() {
-  const router= useRouter()
+  const router = useRouter()
   const [userDetails, setUserDetails] = useState({
     username: "",
     email: "",
@@ -20,15 +20,16 @@ export default function Userform() {
   const handleSubmit = async (e) => {
 
     e.preventDefault();
-   
+
     try {
+      let csrftoken = await getcsrftoken()
       const response = await axios.post(
         "http://localhost:8000/api/register/",
         userDetails,
         {
           withCredentials: true,
         }
-      
+
       );
       if (response.data.status == "successful") {
         router.push("/login");
