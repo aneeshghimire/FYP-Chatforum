@@ -1,67 +1,146 @@
-"use client"
-import Layout from '@/app/components/layout/Layout';
-import React, { useEffect, useState } from 'react';
-import ThreadCard from '@/app/components/threadcard/Threadcard';
-import axios from 'axios';
-import getcsrftoken from '@/helpers/getcsrftoken';
+"use client";
+import Layout from "@/app/components/layout/Layout";
+import React, { useEffect, useState } from "react";
+import ThreadCard from "@/app/components/threadcard/Threadcard";
+import axios from "axios";
+import getcsrftoken from "@/helpers/getcsrftoken";
+import Link from "next/link";
 
-export default function RoomPage({params}) {
-  // Example data for threads
-//   const threads = [
-//     {
-//       id: 1,
-//       title: 'How do you handle errors in Go?',
-//       description: 'Discuss various methods for error handling in Go.',
-//     },
-//     {
-//       id: 2,
-//       title: 'What are the benefits of using Go over other languages?',
-//       description: 'Explore why Go might be chosen over other programming languages.',
-//     },
-//     {
-//       id: 3,
-//       title: 'How to implement concurrency in Go?',
-//       description: 'Learn about goroutines and channels for concurrency in Go.',
-//     },
-//   ];
+export default function RoomPage({ params }) {
+  const [threads, setThreads] = useState([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [newThreadTitle, setNewThreadTitle] = useState("");
+  // const [userProfile, setUserProfile] = useState({});
 
-const [threads,setThreads]= useState([])
+  useEffect(() => {
+    getThreads();
+    // fetchUserProfile();
+  }, []);
 
-useEffect(()=>{
-    getThreads()
-},[])
+  // const fetchUserProfile = async () => {
+  //   const csrftoken = await getcsrftoken();
+  //   try {
+  //     const response = await axios.get(
+  //       "http://localhost:8000/api/getprofiledata/",
+  //       {
+  //         headers: {
+  //           "X-CSRFToken": csrftoken.value,
+  //         },
+  //         withCredentials: true,
+  //       }
+  //     );
+  //     setUserProfile(response.data.user);
+  //     console.log(response.data.user);
+  //   } catch (err) {
+  //     console.log(err.message);
+  //   }
+  // };
 
-const getThreads= async()=>{
-const csrftoken= await getcsrftoken();
-try{
-const response = await axios.get(`http://localhost:8000/api/${params.name}/getthreads/`,
-    {
-        headers: {
-          "X-CSRFToken": csrftoken.value,
-        },
-        withCredentials: true,
+  const getThreads = async () => {
+    const csrftoken = await getcsrftoken();
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/${params.name}/getthreads/`,
+        {
+          headers: { "X-CSRFToken": csrftoken.value },
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+      if (response.data.status === "successful") {
+        setThreads(response.data.threads);
       }
-)
-console.log(response)
-if(response.data.status=="successful"){
-    setThreads(response.data.threads)
-}
-}catch(err){
-console.log(err.message)
-}
-}
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const handleAddThread = async () => {
+    const csrftoken = await getcsrftoken();
+    const threadDetails = {
+      roomName: params.name,
+      title: newThreadTitle,
+    };
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/${params.name}/addthread/`,
+        threadDetails,
+        {
+          headers: { "X-CSRFToken": csrftoken.value },
+          withCredentials: true,
+        }
+      );
+      if (response.data.status === "successful") {
+       await getThreads()
+        setIsPopupOpen(false); // Close the modal after submission
+        setNewThreadTitle(""); // Reset the title input
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
 
   return (
     <Layout>
       <div className="flex-1 p-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-6">GoLang Threads</h2>
+        <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
+          GoLang Threads
+        </h2>
+        <Link href="#" passHref>
+          <span
+            className="text-blue-500 hover:text-blue-700 cursor-pointer"
+            onClick={() => setIsPopupOpen(true)}
+          >
+            Add New Thread
+          </span>
+        </Link>
+
         <div className="space-y-4">
-          {threads.map(thread => (
-            <ThreadCard key={thread.id} id={thread.id} title={thread.title} description={thread.description}  />
+          {threads.map((thread) => (
+            <ThreadCard
+              key={thread.id}
+              id={thread.id}
+              title={thread.title}
+              description={thread.description}
+            />
           ))}
         </div>
       </div>
+
+      {/* Modal for Adding a Thread */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+            <h3 className="text-xl font-bold mb-4">Create a New Thread</h3>
+            <input
+              type="text"
+              value={newThreadTitle}
+              onChange={(e) => setNewThreadTitle(e.target.value)}
+              className="border border-gray-300 p-3 w-full rounded-md focus:outline-none"
+              placeholder="Thread title"
+              required
+            />
+            <div className="flex justify-end space-x-4 mt-4">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                onClick={() => {
+                  setIsPopupOpen(false);
+                  setNewThreadTitle(""); // Reset on cancel
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-purple-600 text-white px-4 py-2 rounded-md"
+                onClick={handleAddThread}
+              >
+                Add Thread
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
-    
   );
 }

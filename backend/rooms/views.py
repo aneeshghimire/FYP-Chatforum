@@ -32,3 +32,16 @@ def joinroom(request,room_name):
         return JsonResponse({"status":"successful","message":"Room joined successfully"})
     return JsonResponse({"status":"error","message":"Cannot join the room"})
 
+
+@api_view(['POST'])
+def addthreads(request,room_name):
+    if request.method== "POST":
+        room =Room.objects.get(name=room_name)
+        user= request.user
+        title= request.data["title"]
+        if room and user and title:  
+            Thread.objects.create(room=room, title=title, created_by=user)
+            return JsonResponse({"status":"successful","message":"Updated Sucessfully"})
+        return JsonResponse({"status":"error","message":"Invalid Data"})
+        
+        
