@@ -10,32 +10,13 @@ export default function RoomPage({ params }) {
   const [threads, setThreads] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [newThreadTitle, setNewThreadTitle] = useState("");
-  // const [userProfile, setUserProfile] = useState({});
 
+  // Run this effect only when the component is mounted, not on thread state updates
   useEffect(() => {
     getThreads();
-    // fetchUserProfile();
-  }, []);
+  }, []);  // Empty dependency array to run the effect once on component mount
 
-  // const fetchUserProfile = async () => {
-  //   const csrftoken = await getcsrftoken();
-  //   try {
-  //     const response = await axios.get(
-  //       "http://localhost:8000/api/getprofiledata/",
-  //       {
-  //         headers: {
-  //           "X-CSRFToken": csrftoken.value,
-  //         },
-  //         withCredentials: true,
-  //       }
-  //     );
-  //     setUserProfile(response.data.user);
-  //     console.log(response.data.user);
-  //   } catch (err) {
-  //     console.log(err.message);
-  //   }
-  // };
-
+  // Fetch existing threads from the backend
   const getThreads = async () => {
     const csrftoken = await getcsrftoken();
     try {
@@ -48,13 +29,14 @@ export default function RoomPage({ params }) {
       );
       console.log(response);
       if (response.data.status === "successful") {
-        setThreads(response.data.threads);
+        setThreads(response.data.threads); // This will update the state once after fetching
       }
     } catch (err) {
       console.log(err.message);
     }
   };
 
+  // Handle the addition of a new thread
   const handleAddThread = async () => {
     const csrftoken = await getcsrftoken();
     const threadDetails = {
@@ -72,7 +54,7 @@ export default function RoomPage({ params }) {
         }
       );
       if (response.data.status === "successful") {
-       await getThreads()
+        await getThreads() // Manually update the threads state
         setIsPopupOpen(false); // Close the modal after submission
         setNewThreadTitle(""); // Reset the title input
       }

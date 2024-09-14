@@ -4,8 +4,8 @@ import Animatedtext from "./components/animatedtext/Animatedtext";
 
 export default function Home() {
   return (
-   <div>
-    <Userform/>
-   </div>
+    <div>
+      <Userform />
+    </div>
   );
 }
