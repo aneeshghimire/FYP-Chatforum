@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Room,Thread
 from django.http import JsonResponse
-from .serializers import RoomSerializer
+from .serializers import RoomSerializer,ThreadSerializer
 from rest_framework.decorators import api_view
 # Create your views here.
 
@@ -14,3 +14,23 @@ def getavailablerooms(request):
     if(not rooms):
         return JsonResponse({"status":"Error","message":"No rooms available"})
     return JsonResponse({"status":"successfull","rooms":serializer.data})
+
+@api_view(['GET'])
+def joinroom(request,room_name):
+    room = Room.objects.get(name=room_name)
+    user = request.user
+    if user.is_authenticated:
+        room.users.add(user)
+        return JsonResponse({"status":"successfull","message":"Room joined successfully"})
+    return JsonResponse({"status":"error","message":"Cannot join the room"})
+
+
+@api_view(['GET'])
+def getthreads(request,room_name):
+    room = Room.objects.get(name=room_name)
+    threads = Thread.objects.filter(room=room)
+    if(not threads):
+        return JsonResponse({"status":"error","message":"No threads available"})
+    serializer = ThreadSerializer(threads,many = True)
+    return JsonResponse({"status":"successfull",
+                        "threads":serializer.data})
