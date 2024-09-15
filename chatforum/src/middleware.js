@@ -7,7 +7,7 @@ export async function middleware(request) {
     const session = await getsession()
     const path = request.nextUrl.pathname
     const isPublicPath = path === '/login' || path === '/'
-    const isPrivatePath = path === '/userdashboard' || path === 'uploadprofilepicture' || path === '/rooms' || path === '/admminpanel'
+    const isPrivatePath = path === '/userdashboard' || path === 'uploadprofilepicture' || path === '/rooms' || path === '/adminpanel'
     if (isPublicPath && session) {
         return NextResponse.redirect(new URL('/userdashboard', request.url))
     }
@@ -20,5 +20,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/', '/login', '/uploadprofilepicture', '/userdashboard'],
+    matcher: ['/', '/login', '/uploadprofilepicture', '/userdashboard', '/adminpanel'],
 };

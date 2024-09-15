@@ -53,11 +53,7 @@ def deleterooms(request,roomname):
     try:
         deletingroom = Room.objects.get(name=roomname)
         deletingroom.delete()
-        rooms = Room.objects.filter(name=roomname)
-        serializer = RoomSerializer(rooms,many=True)
-        if(not rooms):
-             return JsonResponse({"status":"delete_successfull",'rooms':[],"message":"All rooms deleted"})
-        return JsonResponse({"status":"delete_successfull",'rooms':serializer.data})
+        return JsonResponse({"status":"successful","message":"All rooms deleted"})
     except ObjectDoesNotExist:
         return JsonResponse({"status": "error", "message": "Room not found"})
     
@@ -69,9 +65,8 @@ def deletethreads(request,roomname,threadid):
         threads = Thread.objects.filter(room__name=roomname)
         serializer = ThreadSerializer(threads, many=True)
         if(not threads):
-            return JsonResponse({"status": "delete_successfull", 'threads': [], "message": "All threads deleted"})
-        serializer = ThreadSerializer(threads,many=True)
-        return JsonResponse({"status":"delete_successfull",'threads':serializer.data})
+            return JsonResponse({"status": "successful", 'threads': [], "message": "All threads deleted"})
+        return JsonResponse({"status":"successful",'threads':serializer.data})
     except ObjectDoesNotExist:
         return JsonResponse({"status": "error", "message": "Thread not found"})
 

@@ -12,11 +12,11 @@ export default function page({ params }) {
 
     const [threads, setThreads] = useState([])
     const [totalthreads, settotalThreads] = useState(0)
-    const [refreshKey, setrefreshKey] = useState(0)
+
 
     useEffect(() => {
         getThreads();
-    }, [refreshKey]);
+    },);
 
     const getThreads = async () => {
         try {
@@ -44,7 +44,7 @@ export default function page({ params }) {
                     headers: { "X-CSRFToken": csrftoken.value },
                     withCredentials: true
                 });
-            if (response.data.status == "delete_successfull") {
+            if (response.data.status == "successful") {
                 console.log("Data Deleted")
                 if (response.data.threads.length === 0) {
                     settotalThreads(0)

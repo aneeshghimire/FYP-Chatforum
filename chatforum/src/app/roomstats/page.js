@@ -5,6 +5,7 @@ import Layout from "../components/layout/Layout";
 import { FaEye, FaTrash, FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import getcsrftoken from "@/helpers/getcsrftoken";
+import { ThreeDots } from "react-loader-spinner";
 
 
 
@@ -12,8 +13,8 @@ import getcsrftoken from "@/helpers/getcsrftoken";
 export default function RoomStats() {
     const [rooms, setRooms] = useState([]);
     const [totalRooms, setTotalRooms] = useState(0);
-    const [refreshKey, setrefreshKey] = useState(0)
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
     const [roomDetails, setroomDetails] = useState({
         name: "",
@@ -30,48 +31,52 @@ export default function RoomStats() {
 
     useEffect(() => {
         fetchRooms();
-    }, [refreshKey]);
+    }, []);
 
 
     const fetchRooms = async () => {
+        setIsLoading(true)
         try {
             const response = await axios.get("http://localhost:8000/api/getavailablerooms");
-            setRooms(response.data.rooms);
-            setTotalRooms(response.data.rooms.length);
+            if (response.data.status == 'successful') {
+                setRooms(response.data.rooms);
+                setTotalRooms(response.data.rooms.length);
+            }
+            else {
+                setRooms([])
+                setTotalRooms(0)
+            }
         } catch (error) {
             console.error("Error fetching rooms:", error);
+        } finally {
+            setIsLoading(false)
         }
     };
 
     const handleDelete = async (roomname) => {
         const csrftoken = await getcsrftoken()
         try {
-
+            setIsLoading(true)
             const response = await axios.get(`http://localhost:8000/api/deleterooms/${roomname}`,
                 {
                     headers: { "X-CSRFToken": csrftoken.value },
                     withCredentials: true
                 });
-            if (response.data.status == "delete_successfull") {
+            if (response.data.status == "successful") {
                 console.log("Data Deleted")
-                // alert("Deleted Successfully")
-                if (response.data.rooms.length === 0) {
-                    setTotalRooms(0)
-                    setRooms([]);
-                } else {
-                    setRooms(response.data.threads);
-                }
-                setrefreshKey((currentvalue) => currentvalue + 1)
-
+                await fetchRooms()
             }
 
         } catch (err) {
             console.log(err.message)
+        } finally {
+            setIsLoading(false)
         }
     }
 
     const handleRoomAdd = async () => {
         const csrftoken = await getcsrftoken()
+        setIsLoading(true)
         try {
 
             const response = await axios.post(`http://localhost:8000/api/addrooms/`,
@@ -89,12 +94,12 @@ export default function RoomStats() {
                     name: "",
                     description: ""
                 });
-                setrefreshKey((currentvalue) => currentvalue + 1)
-
-
+                await fetchRooms()
             }
         } catch (err) {
             console.log(err.message)
+        } finally {
+            setIsLoading(false)
         }
 
     }
@@ -119,6 +124,7 @@ export default function RoomStats() {
 
                 {/* Table Section */}
                 <div className="overflow-x-auto">
+                    {isLoading && <ThreeDots height="80" width="80" color="#4fa94d" radius="9" ariaLabel="three-dots-loading" />}
                     <table className="min-w-full table-auto">
                         <thead>
                             <tr className="bg-gray-200">
