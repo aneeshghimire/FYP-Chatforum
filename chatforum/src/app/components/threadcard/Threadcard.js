@@ -1,11 +1,13 @@
+"use client"
 import React from 'react';
 import { useRouter,usePathname } from 'next/navigation';
 
-export default function ThreadCard({id,title, description }) {
+export default function ThreadCard({id,title, description,roomname}) {
   const router= useRouter()
   const path= usePathname()
+
   const joinChat=()=>{
-    router.push(`${path}/${id}`)
+    router.push(`${path}/${id}?roomname=${roomname}`);
   }
   return (
     <div className="w-full p-4 bg-white rounded-lg shadow-md mb-4 border border-gray-200 hover:shadow-lg transition-shadow duration-300">

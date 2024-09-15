@@ -85,6 +85,7 @@ export default function RoomPage({ params }) {
               id={thread.id}
               title={thread.title}
               description={thread.description}
+              roomname={params.name}
             />
           ))}
         </div>

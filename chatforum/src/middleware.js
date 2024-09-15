@@ -17,6 +17,10 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/', '/login',
-        '/uploadprofilepicture'],
+    matcher: [
+        '/', 
+        '/login',
+        '/uploadprofilepicture',
+        '/userdashboard'
+],
 };

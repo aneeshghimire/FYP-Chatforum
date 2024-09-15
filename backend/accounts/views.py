@@ -54,7 +54,7 @@ def signin(request):
 
 
 @api_view(['POST'])
-def uploadprofile_picture(request):
+def uploadprofilepicture(request):
     user = request.user
     if not user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
