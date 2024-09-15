@@ -22,11 +22,8 @@ export default function RoomStats() {
     })
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target
-        setroomDetails((currval) => ({
-            ...currval,
-            [name]: value
-        }));
+        setroomDetails({ ...roomDetails, [e.target.name]: e.target.value });
+        console.log(roomDetails);
     };
 
     useEffect(() => {
@@ -74,6 +71,7 @@ export default function RoomStats() {
         }
     }
 
+
     const handleRoomAdd = async () => {
         const csrftoken = await getcsrftoken()
         setIsLoading(true)
@@ -104,20 +102,23 @@ export default function RoomStats() {
 
     }
 
+
     const enterRoom = (roomname) => {
         router.push(`/roomstats/${roomname}`);
-    }
+    };
 
     return (
         <Layout>
             <div className="min-h-screen p-4 md:p-8">
-
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
                         Total Rooms: {totalRooms}
                     </h1>
 
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex text-center justify-center gap-2" onClick={() => setIsPopupOpen(true)}>
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex text-center justify-center gap-2"
+                        onClick={() => setIsPopupOpen(true)}
+                    >
                         <FaPlus className="text-white mt-1"></FaPlus>Add Room
                     </button>
                 </div>
@@ -149,12 +150,14 @@ export default function RoomStats() {
                                                 <FaEye />
                                             </button>
 
-                                            <button className="text-red-500 hover:text-red-700 inline-block w-4 h-6" onClick={() => handleDelete(room.name)}>
+                                            <button
+                                                className="text-red-500 hover:text-red-700 inline-block w-4 h-6"
+                                                onClick={() => handleDelete(room.name)}
+                                            >
                                                 <FaTrash />
                                             </button>
                                         </div>
                                     </td>
-
                                 </tr>
                             ))}
                         </tbody>
@@ -162,10 +165,9 @@ export default function RoomStats() {
                 </div>
             </div>
 
-
             {isPopupOpen && (
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full p-2">
+                    <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
                         <h3 className="text-xl font-bold mb-4">Create a Room</h3>
                         <input
                             type="text"
@@ -192,17 +194,23 @@ export default function RoomStats() {
                                     setIsPopupOpen(false);
                                     setroomDetails({
                                         name: "",
-                                        description: ""
+                                        description: "",
                                     });
                                 }}
                             >
                                 Cancel
                             </button>
-                            <button className="bg-purple-600 text-white px-4 py-2 rounded-md" onClick={handleRoomAdd}>Add Room</button>
+                            <button
+                                className="bg-purple-600 text-white px-4 py-2 rounded-md"
+                                onClick={handleRoomAdd}
+                            >
+                                Add Room
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
         </Layout>
     );
-}
+
+};

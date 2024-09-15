@@ -1,9 +1,12 @@
 "use client"
 import getcsrftoken from "@/helpers/getcsrftoken";
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 
 export default function ChatRoom({ params }) {
+  const searchParams = useSearchParams();
+  const roomname = searchParams.get('roomname');
   const [messages, setMessages] = useState([
     { sender: "User123", content: "Hello everyone!", isUser: false },
     { sender: "User456", content: "Hi there!", isUser: false },
@@ -69,7 +72,7 @@ export default function ChatRoom({ params }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <div className="bg-white p-6 shadow-md flex justify-between items-center">
-        <h2 className="text-xl font-bold">GoLang Chat Room</h2>
+        <h2 className="text-xl font-bold">{roomname}</h2>
         <button className="text-red-600 hover:text-red-700 font-semibold">Leave Chat</button>
       </div>
       <div className="flex-1 overflow-y-auto p-6">

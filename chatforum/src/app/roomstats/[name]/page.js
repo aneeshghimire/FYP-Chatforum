@@ -5,40 +5,48 @@ import Layout from "@/app/components/layout/Layout";
 import { FaEye, FaTrash } from "react-icons/fa";
 import getcsrftoken from '@/helpers/getcsrftoken';
 import { useRouter } from "next/navigation";
+import { ThreeDots } from "react-loader-spinner";
 
 
 export default function page({ params }) {
     const router = useRouter()
-
+    const [isLoading, setIsLoading] = useState(false)
     const [threads, setThreads] = useState([])
     const [totalthreads, settotalThreads] = useState(0)
 
-
     useEffect(() => {
         getThreads();
-    },);
+    }, [totalthreads]);
 
     const getThreads = async () => {
         try {
-
+            setIsLoading(true)
             const csrftoken = await getcsrftoken()
             const response = await axios.get(`http://localhost:8000/api/${params.name}/getthreads`, {
                 headers: { "X-CSRFToken": csrftoken.value },
                 withCredentials: true,
             });
             if (response.data.status == "successful") {
+                console.log(response.data)
                 setThreads(response.data.threads)
                 settotalThreads(response.data.threads.length)
+            } else {
+                console.log(response.data)
+                setThreads([])
+                settotalThreads(0)
             }
         } catch (err) {
             console.log(err.message);
+        } finally {
+            setIsLoading(false)
+
         }
     }
 
     const handleDelete = async (threadid) => {
         const csrftoken = await getcsrftoken()
         try {
-
+            setIsLoading(true)
             const response = await axios.get(`http://localhost:8000/api/deletethreads/${params.name}/${threadid}`,
                 {
                     headers: { "X-CSRFToken": csrftoken.value },
@@ -46,17 +54,13 @@ export default function page({ params }) {
                 });
             if (response.data.status == "successful") {
                 console.log("Data Deleted")
-                if (response.data.threads.length === 0) {
-                    settotalThreads(0)
-                    setThreads([]);
-                } else {
-                    setThreads(response.data.threads);
-                }
-                setrefreshKey((currentvalue) => currentvalue + 1)
+                await getThreads()
             }
 
         } catch (err) {
             console.log(err.message)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -71,6 +75,7 @@ export default function page({ params }) {
 
                 {/* Table Section */}
                 <div className="overflow-x-auto">
+                    {isLoading && <ThreeDots height="80" width="80" color="#4fa94d" radius="9" ariaLabel="three-dots-loading" />}
                     <table className="min-w-full table-auto">
                         <thead>
                             <tr className="bg-gray-200">
