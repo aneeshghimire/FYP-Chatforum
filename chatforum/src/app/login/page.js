@@ -9,7 +9,7 @@ import { Discuss } from 'react-loader-spinner'
 
 export default function LoginPage() {
   const router = useRouter();
-  const[isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState({ email: "", password: "" });
 
   const handleChange = (event) => {
@@ -21,38 +21,38 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true)
     // let csrftoken= await getcsrftoken()
-    try{
-    const response = await axios.post(
-      "http://localhost:8000/api/signin/",
-      userDetails,
-      {
-        withCredentials: true,
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/signin/",
+        userDetails,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+      if (
+        response.data.status == "successful" &&
+        response.data.hasUserProfilePicture == true
+      ) {
+        router.push("/userdashboard");
+      } else if (response.data.status == "successful") {
+        router.push("/uploadprofilepicture");
+      } else if (response.data.status == "error") {
+        toast.error("Email or Password don't match", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+        });
       }
-    );
-    console.log(response);
-    if (
-      response.data.status == "successful" &&
-      response.data.hasUserProfilePicture == true
-    ) {
-      router.push("/userdashboard");
-    } else if (response.data.status == "successful") {
-      router.push("/uploadprofilepicture");
-    } else if (response.data.status == "error") {
-      toast.error("Email or Password don't match", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-      });
+    } catch (err) {
+      console.log(err.message)
     }
-  }catch(err){
-    console.log(err.message)
-  }
-  finally{
-    setIsLoading(false)
-  }
+    finally {
+      setIsLoading(false)
+    }
 
     // Implement login logic here
     console.log("Logging in with:", userDetails);
@@ -66,7 +66,7 @@ export default function LoginPage() {
 
       {/* Login Form */}
       <div className="relative z-10 bg-white p-10 rounded-lg shadow-lg w-full max-w-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
-        {isLoading && <Discuss color="purple"/>}
+        {isLoading && <Discuss color="purple" />}
         <div className="flex justify-center mb-6">
           <img
             src="/logo/logo.png"

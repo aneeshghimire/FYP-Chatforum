@@ -1,5 +1,6 @@
+
 from django.contrib import admin
-from .models import Room
+from .models import Room,Thread
 
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'created_at')
@@ -8,4 +9,5 @@ class RoomAdmin(admin.ModelAdmin):
 
 admin.site.register(Room,RoomAdmin)
 
-# Register your models here.
+admin.site.register(Room)
+admin.site.register(Thread)
