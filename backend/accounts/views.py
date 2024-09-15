@@ -40,12 +40,23 @@ def signin(request):
 
         user= authenticate(username=user.username,password=password)
         hasUserProfile= False
+        is_superuser = False
         
         if user:
             if hasattr(user, 'userprofile'):
                 hasUserProfile = True
             login(request,user)  
-            response = JsonResponse({'status': 'successful', 'user':str(request.user.is_authenticated),'message': 'Login Succesful','hasUserProfilePicture':hasUserProfile})
+            if user.is_superuser:
+                is_superuser=True
+            print(is_superuser)
+            response_data = {
+                'status': 'successful',
+                'user': str(request.user.is_authenticated),
+                'message': 'Login Successful',
+                'hasUserProfilePicture': hasUserProfile,
+                'is_superuser': is_superuser
+            }
+            response = JsonResponse(response_data)
             print(f"Session key after login: {request.session.session_key}")
             print(f"Session data: {request.session.items()}")
             return response
@@ -54,7 +65,7 @@ def signin(request):
 
 
 @api_view(['POST'])
-def uploadprofile_picture(request):
+def uploadprofilepicture(request):
     user = request.user
     if not user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)

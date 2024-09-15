@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import getcsrftoken from "@/helpers/getcsrftoken";
-import Navbar from "../components/navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import Layout from "../components/layout/Layout";

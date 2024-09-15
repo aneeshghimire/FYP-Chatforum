@@ -1,14 +1,17 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from .models import Room,Thread
 from django.http import JsonResponse
 from .serializers import RoomSerializer,ThreadSerializer
+from django.core.exceptions import ObjectDoesNotExist
+import json
 
 @api_view(['GET'])
 def getavailablerooms(request):
     rooms=Room.objects.all()
     serializer= RoomSerializer(rooms,many=True)
-    print(serializer.data)
+    # print(serializer.data)
 
     if(not rooms):
         return JsonResponse({"status":"error","message":"No rooms available"})
@@ -45,3 +48,41 @@ def addthreads(request,room_name):
         return JsonResponse({"status":"error","message":"Invalid Data"})
         
         
+api_view(['GET'])
+def deleterooms(request,roomname):
+    try:
+        deletingroom = Room.objects.get(name=roomname)
+        deletingroom.delete()
+        rooms = Room.objects.filter(name=roomname)
+        serializer = RoomSerializer(rooms,many=True)
+        if(not rooms):
+             return JsonResponse({"status":"delete_successfull",'rooms':[],"message":"All rooms deleted"})
+        return JsonResponse({"status":"delete_successfull",'rooms':serializer.data})
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "error", "message": "Room not found"})
+    
+@api_view(['GET'])
+def deletethreads(request,roomname,threadid):
+    try:
+        deletingthread = Thread.objects.get(id=threadid)
+        deletingthread.delete()
+        threads = Thread.objects.filter(room__name=roomname)
+        serializer = ThreadSerializer(threads, many=True)
+        if(not threads):
+            return JsonResponse({"status": "delete_successfull", 'threads': [], "message": "All threads deleted"})
+        serializer = ThreadSerializer(threads,many=True)
+        return JsonResponse({"status":"delete_successfull",'threads':serializer.data})
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "error", "message": "Thread not found"})
+
+
+def addrooms(request):
+    if request.method== 'POST':
+        data = json.loads(request.body)
+        roomname = data.get('name')
+        roomdescription = data.get('description')
+        if roomname and roomdescription:
+            room = Room.objects.create(name=roomname,description=roomdescription)
+            room.save()
+            return JsonResponse({"status": "successful", "message": "Room created Successfully"})
+        return JsonResponse({"status": "error", "message": "Failed to create room"})

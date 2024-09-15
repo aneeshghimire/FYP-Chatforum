@@ -67,7 +67,7 @@ export default function RoomPage({ params }) {
     <Layout>
       <div className="flex-1 p-8">
         <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
-          GoLang Threads
+          {params.name} Threads
         </h2>
         <Link href="#" passHref>
           <span
