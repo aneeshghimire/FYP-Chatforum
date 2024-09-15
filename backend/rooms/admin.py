@@ -8,6 +8,4 @@ class RoomAdmin(admin.ModelAdmin):
     exclude = ('users',)
 
 admin.site.register(Room,RoomAdmin)
-
-admin.site.register(Room)
 admin.site.register(Thread)
