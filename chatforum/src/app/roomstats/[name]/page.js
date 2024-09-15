@@ -12,11 +12,10 @@ export default function page({ params }) {
 
     const [threads, setThreads] = useState([])
     const [totalthreads, settotalThreads] = useState(0)
-    const [refreshKey, setrefreshKey] = useState(0)
 
     useEffect(() => {
         getThreads();
-    }, [refreshKey]);
+    }, [totalthreads]);
 
     const getThreads = async () => {
         try {
@@ -27,8 +26,13 @@ export default function page({ params }) {
                 withCredentials: true,
             });
             if (response.data.status == "successful") {
+                console.log(response.data)
                 setThreads(response.data.threads)
                 settotalThreads(response.data.threads.length)
+            }else{
+                console.log(response.data)
+                setThreads([])
+                settotalThreads(0)
             }
         } catch (err) {
             console.log(err.message);
@@ -44,15 +48,9 @@ export default function page({ params }) {
                     headers: { "X-CSRFToken": csrftoken.value },
                     withCredentials: true
                 });
-            if (response.data.status == "delete_successfull") {
+            if (response.data.status == "successful") {
                 console.log("Data Deleted")
-                if (response.data.threads.length === 0) {
-                    settotalThreads(0)
-                    setThreads([]);
-                } else {
-                    setThreads(response.data.threads);
-                }
-                setrefreshKey((currentvalue) => currentvalue + 1)
+                await getThreads()
             }
 
         } catch (err) {
