@@ -36,4 +36,3 @@ class UserProfile(models.Model):
 
         super().save(*args, **kwargs)
 
-

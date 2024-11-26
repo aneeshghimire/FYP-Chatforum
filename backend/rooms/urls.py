@@ -8,5 +8,13 @@ urlpatterns = [
     path('addrooms/', views.addrooms, name='addrooms'),
     path('<str:room_name>/getthreads/',views.getthreads,name='getthreads'),
     path('<str:room_name>/joinroom/',views.joinroom,name='joinroom'),
-    path('<str:room_name>/addthread/',views.addthreads,name='addthreads')
+    path('<str:room_name>/addthread/',views.addthreads,name='addthreads'),
+    path('getMessages/<int:threadid>/',views.getMessages,name='getMessages'),
+    path('editthreads/',views.editthreads,name='editthreads'),
+    path('handleUpVote/<int:messageid>/',views.handleUpVote,name='handleUpVote'),
+    path('handleDownVote/<int:messageid>/',views.handleDownVote,name='handleDownVote'),
+    path('getJoinedRooms/',views.getJoinedRooms,name='getJoinedRooms'),
+    path('getJoinedThreads/',views.getJoinedThreads,name='getJoinedThreads'),
+    path('getCreatedThreads/',views.getCreatedThreads,name='getCreatedThreads'),
+    
 ]   

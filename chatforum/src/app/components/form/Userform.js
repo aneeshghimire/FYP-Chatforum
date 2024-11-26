@@ -4,6 +4,8 @@ import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import getcsrftoken from "@/helpers/getcsrftoken";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function Userform() {
   const router = useRouter()
@@ -27,10 +29,33 @@ export default function Userform() {
         "http://localhost:8000/api/register/",
         userDetails,
       );
+      if (response.data.message == 'Email Already Exists') {
+        console.log("Email exists")
+        toast.error("User with given email already exists", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+        });
+      }
+      if (response.data.message == 'Username Already Exists') {
+        console.log("Username exists")
+        toast.error("Username already exists. Select another one", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+        });
+      }
       if (response.data.status == "successful") {
         router.push("/login");
       }
-      console.log(response);
+
+      // console.log(response);
     } catch (err) {
       console.error(err);
     }
@@ -95,11 +120,18 @@ export default function Userform() {
           >
             Sign Up
           </button>
+          <ToastContainer />
         </form>
         <div className="mt-6 text-center text-gray-600">
-          Already have an account?{" "}
+          Already have an account? {" "}
           <Link href="/login" className="text-purple-700 hover:underline">
             Log In
+          </Link>
+        </div>
+        <div className="mt-6 text-center text-gray-600">
+          Admin?{" "}
+          <Link href="/admin" className="text-purple-700 hover:underline">
+            Log In As Admin
           </Link>
         </div>
       </div>

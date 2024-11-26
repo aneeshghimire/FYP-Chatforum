@@ -3,16 +3,22 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import getcsrftoken from "@/helpers/getcsrftoken";
 import { IoIosNotifications } from "react-icons/io";
-import { useRouter } from "next/navigation";
 import Layout from "../components/layout/Layout";
+import Link from "next/link";
 
 export default function UserDashboard() {
-  const router = useRouter();
+
   const [profileUrl, setProfileUrl] = useState("");
   const [profileDetails, setProfileDetails] = useState({});
-
+  const [recentThreads, setRecentThreads] = useState([]);
+  const [joinedThreadsLength, setJoinedThreadsLength] = useState(null)
+  const [createdThreadsLength, setCreatedThreadsLength] = useState(null)
+  const [joinedRoomsLength, setJoinedRoomsLength] = useState(null)
   useEffect(() => {
     getUserProfile();
+    getJoinedThreads();
+    getJoinedRooms();
+    getCreatedThreads();
   }, []);
 
   const getUserProfile = async () => {
@@ -29,6 +35,66 @@ export default function UserDashboard() {
     setProfileUrl(response.data.profile.profile_picture_url);
     setProfileDetails(response.data.user);
   };
+
+  const getJoinedThreads = async () => {
+
+    const csrftoken = await getcsrftoken();
+    const response = await axios.get("http://localhost:8000/api/getJoinedThreads/",
+      {
+        headers: {
+          "X-CSRFToken": csrftoken.value,
+        }, withCredentials: true,
+      }
+    )
+    if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      console.log("Data joined threads: ", response.data)
+      setJoinedThreadsLength(response.data.data.length);
+      filterthreads(response.data.data)
+    } else {
+      setJoinedThreadsLength(0)
+    }
+  }
+  const getJoinedRooms = async () => {
+    const csrftoken = await getcsrftoken();
+    const response = await axios.get("http://localhost:8000/api/getJoinedRooms/",
+      {
+        headers: {
+          "X-CSRFToken": csrftoken.value,
+        }, withCredentials: true,
+      }
+    )
+    if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      setJoinedRoomsLength(response.data.data.length);
+    } else {
+      setJoinedThreadsLength(0)
+    }
+  }
+  const getCreatedThreads = async () => {
+    const csrftoken = await getcsrftoken();
+    const response = await axios.get("http://localhost:8000/api/getCreatedThreads/",
+      {
+        headers: {
+          "X-CSRFToken": csrftoken.value,
+        }, withCredentials: true,
+      }
+    )
+    if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      setCreatedThreadsLength(response.data.data.length);
+    } else {
+      setCreatedThreadsLength(0)
+    }
+  }
+
+  const filterthreads = (allThreads) => {
+    const twodaysago = new Date()
+    twodaysago.setDate(twodaysago.getDate() - 2)
+
+    const recent = allThreads.filter((thread) => {
+      const threadDate = new Date(thread.created_at)
+      return threadDate >= twodaysago
+    })
+    setRecentThreads(recent)
+  }
 
   return (
     <Layout>
@@ -48,6 +114,11 @@ export default function UserDashboard() {
                 <p className="text-gray-500">
                   Welcome back! Here’s your activity overview.
                 </p>
+                <button className="px-4 py-2 my-2 text-white rounded-lg shadow-md bg-indigo-600  hover:bg-indigo-700 transition">
+                  <Link href="/userprofile">
+                    Edit Profile
+                  </Link>
+                </button>
               </div>
             </div>
             <div className="mt-4 md:mt-0">
@@ -60,16 +131,16 @@ export default function UserDashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-center text-white">
-              <h3 className="text-3xl md:text-4xl font-bold">94</h3>
+              <h3 className="text-3xl md:text-4xl font-bold">{joinedThreadsLength}</h3>
               <p className="mt-2 text-sm md:text-base">Threads Joined</p>
             </div>
             <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-center text-white">
-              <h3 className="text-3xl md:text-4xl font-bold">512</h3>
+              <h3 className="text-3xl md:text-4xl font-bold">{createdThreadsLength}</h3>
               <p className="mt-2 text-sm md:text-base">Contributions</p>
             </div>
             <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-2xl shadow-lg text-center text-white">
-              <h3 className="text-3xl md:text-4xl font-bold">N/A</h3>
-              <p className="mt-2 text-sm md:text-base">Achievements</p>
+              <h3 className="text-3xl md:text-4xl font-bold">{joinedRoomsLength}</h3>
+              <p className="mt-2 text-sm md:text-base">Joined Rooms</p>
             </div>
           </div>
 
@@ -78,9 +149,11 @@ export default function UserDashboard() {
               Recent Activity
             </h2>
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md">
-              <p className="text-gray-600 text-sm md:text-base">
-                You have no recent activities.
-              </p>
+              {recentThreads.map((recentthread, index) => (
+                <p className="text-gray-600 text-sm md:text-base" key={index}>
+                  You have created a thread in room {recentthread.room.name}.
+                </p>
+              ))}
             </div>
           </div>
         </div>

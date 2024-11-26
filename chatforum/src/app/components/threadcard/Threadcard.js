@@ -1,13 +1,12 @@
 "use client"
-import React from 'react';
-import { useRouter,usePathname } from 'next/navigation';
+import React, { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
-export default function ThreadCard({id,title, description,roomname}) {
-  const router= useRouter()
-  const path= usePathname()
-
-  const joinChat=()=>{
-    router.push(`${path}/${id}?roomname=${roomname}`);
+export default function ThreadCard({ id, title, roomname, basepath, created_by, editOption, deleteOption, deleteAction, editAction }) {
+  const router = useRouter()
+  const path = usePathname()
+  const joinChat = () => {
+    router.push(`${basepath}/${roomname}/${id}?roomname=${roomname}`);
   }
   return (
     <div className="w-full p-4 bg-white rounded-lg shadow-md mb-4 border border-gray-200 hover:shadow-lg transition-shadow duration-300">
@@ -22,10 +21,16 @@ export default function ThreadCard({id,title, description,roomname}) {
         {/* Thread Content */}
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600 mt-1">{description}</p>
+          <p className="text-sm text-gray-600 mt-1">Created By: {created_by}</p>
         </div>
 
         {/* Action Button */}
+        <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition" onClick={editAction}>
+          {editOption}
+        </button>
+        <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition" onClick={() => { deleteAction(roomname, id) }}>
+          {deleteOption}
+        </button>
         <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition" onClick={joinChat}>
           Join Chat
         </button>

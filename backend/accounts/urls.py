@@ -8,4 +8,6 @@ urlpatterns = [
     path('getprofiledata/',views.get_user_profile,name="getprofiledata"),
     path('getusers/',views.getusers,name="getusers"),
     path('deleteusers/',views.deleteusers,name="deleteusers"),
+    path('updateInfo/',views.updateInfo,name="updateInfo"),
+    path('admin/login/',views.adminverify,name="adminverify")
 ]

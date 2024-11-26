@@ -8,9 +8,10 @@ import getcsrftoken from "@/helpers/getcsrftoken";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePictureUpload() {
-  const router= useRouter()
+  const router = useRouter()
   const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const defaltImagePath = '\profile.png'
 
   const handleRemove = () => {
     if (previewUrl) {
@@ -19,6 +20,7 @@ export default function ProfilePictureUpload() {
     setImage(null);
     setPreviewUrl(null);
   };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -54,7 +56,7 @@ export default function ProfilePictureUpload() {
         }
       );
       console.log(response);
-      if(response.data.status=="Successful"){
+      if (response.data.status == "Successful") {
         router.push('/userdashboard')
       }
       // Handle success (e.g., show a success message, redirect)
@@ -122,11 +124,11 @@ export default function ProfilePictureUpload() {
               Upload Picture
             </button>
           </form>
-          <div className="mt-6 text-center text-gray-600">
-            <Link href="/dashboard" className="text-purple-700 hover:underline">
+          {/* <div className="mt-6 text-center text-gray-600">
+            <Link href="/userdashboard" className="text-purple-700 hover:underline">
               Skip for now
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
