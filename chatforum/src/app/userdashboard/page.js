@@ -14,6 +14,7 @@ export default function UserDashboard() {
   const [joinedThreadsLength, setJoinedThreadsLength] = useState(null)
   const [createdThreadsLength, setCreatedThreadsLength] = useState(null)
   const [joinedRoomsLength, setJoinedRoomsLength] = useState(null)
+  let createdThreads = []
   useEffect(() => {
     getUserProfile();
     getJoinedThreads();
@@ -46,14 +47,16 @@ export default function UserDashboard() {
         }, withCredentials: true,
       }
     )
+
     if (response.data && response.data.data && Array.isArray(response.data.data)) {
-      console.log("Data joined threads: ", response.data)
       setJoinedThreadsLength(response.data.data.length);
-      filterthreads(response.data.data)
+
     } else {
       setJoinedThreadsLength(0)
     }
   }
+
+
   const getJoinedRooms = async () => {
     const csrftoken = await getcsrftoken();
     const response = await axios.get("http://localhost:8000/api/getJoinedRooms/",
@@ -78,17 +81,18 @@ export default function UserDashboard() {
         }, withCredentials: true,
       }
     )
+    createdThreads = response.data.data
     if (response.data && response.data.data && Array.isArray(response.data.data)) {
       setCreatedThreadsLength(response.data.data.length);
+      filterthreads(response.data.data)
     } else {
       setCreatedThreadsLength(0)
     }
   }
-
   const filterthreads = (allThreads) => {
+
     const twodaysago = new Date()
     twodaysago.setDate(twodaysago.getDate() - 2)
-
     const recent = allThreads.filter((thread) => {
       const threadDate = new Date(thread.created_at)
       return threadDate >= twodaysago
@@ -149,13 +153,31 @@ export default function UserDashboard() {
               Recent Activity
             </h2>
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md">
-              {recentThreads.map((recentthread, index) => (
-                <p className="text-gray-600 text-sm md:text-base" key={index}>
-                  You have created a thread in room {recentthread.room.name}.
-                </p>
-              ))}
+              {recentThreads.length > 0 ? (
+                <ul className="space-y-3">
+                  {recentThreads.map((recentthread, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 md:p-4 hover:bg-gray-100 transition duration-200"
+                    >
+                      <span className="inline-block bg-blue-500 text-white text-xs font-semibold uppercase px-2 py-1 rounded-lg mr-3">
+                        {index + 1}
+                      </span>
+                      <p className="text-gray-700 text-sm md:text-base">
+                        <span className="font-medium text-gray-900">You</span> have created a thread in
+                        <Link href={`/rooms/${recentthread.room.name}`}>
+                          <span className="font-semibold text-blue-600"> {recentthread.room.name}</span>.
+                        </Link>
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm md:text-base">No recent activity.</p>
+              )}
             </div>
           </div>
+
         </div>
       </div>
     </Layout>

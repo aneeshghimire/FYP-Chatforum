@@ -3,7 +3,7 @@ import getcsrftoken from "@/helpers/getcsrftoken";
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 import { CiSquareChevUp, CiSquareChevDown, CiEdit, CiImageOn } from "react-icons/ci";
 import { CgClose } from "react-icons/cg";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 export default function ChatRoom({ params }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const roomname = searchParams.get("roomname");
   const [messages, setMessages] = useState([]);
@@ -355,10 +356,13 @@ export default function ChatRoom({ params }) {
               See more messages
             </button>
           }
-          {/* Back to Threadroom */}
-          <Link href={`/rooms/${roomname}`} className="text-blue-600 hover:text-blue-700 font-semibold border border-blue-600 px-4 py-2 rounded">
-            Back to Threadroom
-          </Link>
+          {/* Back to Previous page */}
+          <button
+            onClick={() => router.back()} // ✅ Works like browser back button
+            className="text-blue-600 hover:text-blue-700 font-semibold border border-blue-600 px-4 py-2 rounded"
+          >
+            Back to Previous Page
+          </button>
           {/* Leave Chat */}
           <button className="text-red-600 hover:text-red-700 font-semibold border border-red-600 px-4 py-2 rounded">
             Leave Chat
@@ -421,12 +425,12 @@ export default function ChatRoom({ params }) {
                 ) : (
                   // When not in edit mode, show the message content
                   <div
-                    className={`p-6 rounded-lg max-w-2xl break-words shadow-xl transition-transform duration-300 ${message.isUser ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-800"
+                    className={`p-6 rounded-lg max-w-2xl break-words shadow-xl transition-transform duration-300 test ${message.isUser ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-800"
                       }`}
                   >
                     <p className="font-semibold text-sm ">{message.sender ? message.sender : message.user.username}</p>
                     <div className="relative group inline-block">
-                      <p className="text-lg">
+                      <p className="text-lg for-testing">
                         {message.content}
                       </p>
                       {/* Tooltip */}
@@ -492,7 +496,7 @@ export default function ChatRoom({ params }) {
             onKeyDown={handleTyping}
             placeholder="Type your message..."
             rows={1}
-            className="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none"
+            className="w-full p-2 border test-message-area border-gray-300 rounded-lg resize-none focus:outline-none"
           />
         </div>
 
@@ -513,7 +517,7 @@ export default function ChatRoom({ params }) {
         </div>
         <button
           onClick={handleSendMessage}
-          className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+          className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition test-send"
         >
           Send
         </button>

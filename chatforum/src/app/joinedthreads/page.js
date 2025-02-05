@@ -16,13 +16,13 @@ export default function CreatedThreads() {
 
   const getcreatedThreads = async () => {
     const csrftoken = await getcsrftoken()
-    const response = await axios.get("http://localhost:8000/api/getJoinedThreads/", {
+    const response = await axios.get("http://localhost:8000/api/getCreatedThreads/", {
       headers: {
         "X-CSRFToken": csrftoken.value, // Include the CSRF token in the request headers
       },
       withCredentials: true,
     })
-    // console.log(response.data.data)
+    console.log(response.data.data)
     setcreatedThreads(response.data.data)
 
   }
@@ -114,13 +114,7 @@ export default function CreatedThreads() {
                 value={newThreadTitle}
                 onChange={(e) => setnewThreadTitle(e.target.value)}
               />
-              {/* If needed for description */}
-              {/* <textarea
-                className="w-full p-3 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 mb-4 focus:outline-none focus:border-purple-500"
-                placeholder="Description"
-                value={threadToEdit?.description || ''}
-                onChange={(e) => setThreadToEdit({ ...threadToEdit, description: e.target.value })}
-              /> */}
+
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => { setIsEditPopupOpen(false) }}

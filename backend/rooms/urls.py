@@ -16,5 +16,6 @@ urlpatterns = [
     path('getJoinedRooms/',views.getJoinedRooms,name='getJoinedRooms'),
     path('getJoinedThreads/',views.getJoinedThreads,name='getJoinedThreads'),
     path('getCreatedThreads/',views.getCreatedThreads,name='getCreatedThreads'),
-    
+    path('getrelatedthreads/<str:room_name>/',views.getrelatedthreads,name="getrelatedthreads"),
+    path('getallthreads/',views.getallthreads,name="getallthreads"),
 ]   

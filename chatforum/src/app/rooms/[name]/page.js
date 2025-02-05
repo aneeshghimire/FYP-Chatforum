@@ -5,9 +5,15 @@ import ThreadCard from "@/app/components/threadcard/Threadcard";
 import axios from "axios";
 import getcsrftoken from "@/helpers/getcsrftoken";
 import Link from "next/link";
+import { IoSearchSharp } from "react-icons/io5";
+import { MagnifyingGlass } from 'react-loader-spinner'
 
 export default function RoomPage({ params }) {
   const [threads, setThreads] = useState([]);
+  const [threadquery, setThreadQuery] = useState({
+    query: ""
+  })
+  const [isLoading, setIsLoading] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [newThreadTitle, setNewThreadTitle] = useState("");
 
@@ -63,6 +69,26 @@ export default function RoomPage({ params }) {
     }
   };
 
+
+  const handleSubmitThreadQueries = async () => {
+    try {
+      setThreads([])
+      setIsLoading(true)
+      const csrftoken = await getcsrftoken()
+      const response = await axios.post(`http://localhost:8000/api/getrelatedthreads/${params.name}/`, threadquery, {
+        headers: { "X-CSRFToken": csrftoken.value },
+        withCredentials: true,
+      })
+      console.log(response.data.matching_threads)
+      setThreads(response.data.matching_threads)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setIsLoading(false)
+    }
+
+  }
+
   return (
     <Layout>
       <div className="flex-1 p-8">
@@ -78,7 +104,18 @@ export default function RoomPage({ params }) {
           </span>
         </Link>
 
-        <div className="space-y-4">
+        <div className="flex justify-center">
+          <div className="bg-white w-1/2 flex justify-center items-center p-2 rounded-md gap-x-3 shadow-gray-500 shadow-sm">
+            <IoSearchSharp className=" text-xl" />
+            <input name="query" type="search" className="outline-none w-full" placeholder="Search Related Threads" onChange={(e) => setThreadQuery({ [e.target.name]: e.target.value })} />
+            <button className=" text-gray-600" onClick={handleSubmitThreadQueries}>Search</button>
+          </div>
+        </div>
+
+        {isLoading && <MagnifyingGlass />}
+
+
+        <div className="space-y-4 mt-10">
           {threads.map((thread) => (
             <ThreadCard
               key={thread.id}
@@ -86,7 +123,7 @@ export default function RoomPage({ params }) {
               title={thread.title}
               description={thread.description}
               roomname={params.name}
-              created_by={thread.created_by['username']}
+              created_by={thread.created_by['username'] || thread.created_by}
               basepath={"/rooms"}
             />
           ))}

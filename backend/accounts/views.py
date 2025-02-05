@@ -13,19 +13,21 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 
+
 @api_view(['POST'])
 def register(request):
     if  request.method== 'POST':
-        print(request.data)
+        # print(request.data)
         email = request.data.get('email')
         username = request.data.get('username')
         if User.objects.filter(email=email).exists():
             return(JsonResponse({'status':'error','message':'Email Already Exists'}))
         if User.objects.filter(username=username).exists():
             return(JsonResponse({'status':'error','message':'Username Already Exists'}))
-        # print(email)
+        print(email)
         registerserializer=UserSerializer(data=request.data)
         if registerserializer.is_valid():
+            print("ya samma aayo")
             registerserializer.save()
             return JsonResponse({'status':'successful','message':'Registration Succesful'}) 
         return JsonResponse({'status':'error','message':'Registration Failure'}) 

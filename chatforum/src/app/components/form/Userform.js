@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import getcsrftoken from "@/helpers/getcsrftoken";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
+import { Discuss } from 'react-loader-spinner'
 
 export default function Userform() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function Userform() {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
@@ -24,12 +26,14 @@ export default function Userform() {
     e.preventDefault();
 
     try {
+      setIsLoading(true)
       let csrftoken = await getcsrftoken()
       const response = await axios.post(
         "http://localhost:8000/api/register/",
         userDetails,
       );
       if (response.data.message == 'Email Already Exists') {
+        setIsLoading(false)
         console.log("Email exists")
         toast.error("User with given email already exists", {
           position: "top-right",
@@ -41,6 +45,7 @@ export default function Userform() {
         });
       }
       if (response.data.message == 'Username Already Exists') {
+        setIsLoading(false)
         console.log("Username exists")
         toast.error("Username already exists. Select another one", {
           position: "top-right",
@@ -52,6 +57,8 @@ export default function Userform() {
         });
       }
       if (response.data.status == "successful") {
+        setIsLoading(false)
+        console.log("Has entered successfull phase")
         router.push("/login");
       }
 
@@ -67,6 +74,8 @@ export default function Userform() {
       <div className="absolute -bottom-20 -left-40 w-[500px] h-[500px] bg-gradient-to-r from-purple-700 to-blue-700 rounded-full opacity-30 transform rotate-45 z-0"></div>
       <div className="absolute -top-40 -right-20 w-[700px] h-[700px] bg-gradient-to-r from-blue-700 to-purple-700 rounded-full opacity-30 transform rotate-45 z-0"></div>
       <div className="relative z-10 bg-white p-6 rounded-lg shadow-lg w-full max-w-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+
+        {isLoading && <Discuss color="purple" />}
         <div className="flex justify-center mb-6">
           <img
             src="/logo/logo.png"

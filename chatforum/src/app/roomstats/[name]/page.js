@@ -28,6 +28,7 @@ export default function page({ params }) {
             });
             if (response.data.status == "successful") {
                 console.log(response.data)
+                // console.log(response.data.threads.created_by)
                 setThreads(response.data.threads)
                 settotalThreads(response.data.threads.length)
             } else {
@@ -81,7 +82,7 @@ export default function page({ params }) {
                             <tr className="bg-gray-200">
                                 <th className="px-4 py-2 text-left text-gray-800">Thread ID</th>
                                 <th className="px-4 py-2 text-left text-gray-800">Title</th>
-                                <th className="px-4 py-2 text-left text-gray-800">Created By (UserID)</th>
+                                <th className="px-4 py-2 text-left text-gray-800">Created By</th>
                                 <th className="px-4 py-2 text-left text-gray-800">Created At</th>
                                 <th className="px-4 py-2 text-left text-gray-800">Actions</th>
                             </tr>
@@ -94,7 +95,7 @@ export default function page({ params }) {
                                 >
                                     <td className="border px-4 py-2">{thread.id}</td>
                                     <td className="border px-4 py-2">{thread.title}</td>
-                                    <td className="border px-4 py-2">{thread.created_by}</td>
+                                    <td className="border px-4 py-2">{thread.created_by.username}</td>
                                     <td className="border px-4 py-2">{thread.created_at}</td>
                                     <td className="border px-4 py-2 text-center">
                                         <button className="text-red-500 hover:text-red-700 inline-block w-4 h-6"
