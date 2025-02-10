@@ -9,18 +9,27 @@ import { IoSearchSharp } from "react-icons/io5";
 import { MagnifyingGlass } from 'react-loader-spinner'
 
 export default function RoomPage({ params }) {
+  const decodedRoomName = decodeURIComponent(params.name);
   const [threads, setThreads] = useState([]);
-  const [threadquery, setThreadQuery] = useState({
-    query: ""
-  })
+  // const [threadquery, setThreadQuery] = useState({
+  //   query: ""
+  // })
   const [isLoading, setIsLoading] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [newThreadTitle, setNewThreadTitle] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [threadexists, setThreadexists] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredThreads = threads.filter(thread =>
+    thread.title.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   // Run this effect only when the component is mounted, not on thread state updates
   useEffect(() => {
+    console.log(params.name)
     getThreads();
-  }, []);  // Empty dependency array to run the effect once on component mount
+  }, []);
 
   // Fetch existing threads from the backend
   const getThreads = async () => {
@@ -59,6 +68,14 @@ export default function RoomPage({ params }) {
           withCredentials: true,
         }
       );
+      if (response.data.status === "Unsuccessful") {
+        setThreadexists(true)
+        setErrorMessage("Thread exists! Please check the corresponding chatroom"); // Set error message
+        setTimeout(() => {
+          setThreadexists(false);
+          setErrorMessage("");
+        }, 2000);
+      }
       if (response.data.status === "successful") {
         await getThreads() // Manually update the threads state
         setIsPopupOpen(false); // Close the modal after submission
@@ -70,30 +87,31 @@ export default function RoomPage({ params }) {
   };
 
 
-  const handleSubmitThreadQueries = async () => {
-    try {
-      setThreads([])
-      setIsLoading(true)
-      const csrftoken = await getcsrftoken()
-      const response = await axios.post(`http://localhost:8000/api/getrelatedthreads/${params.name}/`, threadquery, {
-        headers: { "X-CSRFToken": csrftoken.value },
-        withCredentials: true,
-      })
-      console.log(response.data.matching_threads)
-      setThreads(response.data.matching_threads)
-    } catch (err) {
-      console.log(err)
-    } finally {
-      setIsLoading(false)
-    }
+  // const handleSubmitThreadQueries = async () => {
+  //   try {
+  //     setThreads([])
+  //     setIsLoading(true)
+  //     const csrftoken = await getcsrftoken()
+  //     const response = await axios.post(`http://localhost:8000/api/getrelatedthreads/${params.name}/`, threadquery, {
+  //       headers: { "X-CSRFToken": csrftoken.value },
+  //       withCredentials: true,
+  //     })
+  //     console.log(response.data.matching_threads)
+  //     setThreads(response.data.matching_threads)
+  //   } catch (err) {
+  //     console.log(err)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
 
-  }
+  // }
 
   return (
     <Layout>
       <div className="flex-1 p-8">
         <h2 className="text-3xl font-extrabold text-gray-900 mb-6">
-          {params.name} Threads
+          {decodedRoomName} Threads
+
         </h2>
         <Link href="#" passHref>
           <span
@@ -107,8 +125,9 @@ export default function RoomPage({ params }) {
         <div className="flex justify-center">
           <div className="bg-white w-1/2 flex justify-center items-center p-2 rounded-md gap-x-3 shadow-gray-500 shadow-sm">
             <IoSearchSharp className=" text-xl" />
-            <input name="query" type="search" className="outline-none w-full" placeholder="Search Related Threads" onChange={(e) => setThreadQuery({ [e.target.name]: e.target.value })} />
-            <button className=" text-gray-600" onClick={handleSubmitThreadQueries}>Search</button>
+            {/* <input name="query" type="search" className="outline-none w-full" placeholder="Search Related Threads" onChange={(e) => setThreadQuery({ [e.target.name]: e.target.value })} /> */}
+            <input name="query" type="search" className="outline-none w-full" placeholder="Search Threads" onChange={(e) => setSearchQuery(e.target.value)} />
+            {/* <button className=" text-gray-600" onClick={handleSubmitThreadQueries}>Search</button> */}
           </div>
         </div>
 
@@ -116,7 +135,25 @@ export default function RoomPage({ params }) {
 
 
         <div className="space-y-4 mt-10">
-          {threads.map((thread) => (
+          {filteredThreads.length > 0 ? (
+            filteredThreads.map((thread) => (
+              <ThreadCard
+                key={thread.id}
+                id={thread.id}
+                title={thread.title}
+                description={thread.description}
+                roomname={params.name}
+                created_by={thread.created_by['username'] || thread.created_by}
+                basepath={"/rooms"}
+              />
+
+            ))
+          ) : (
+            <p className="text-center text-gray-500 col-span-full">
+              No rooms found.
+            </p>
+          )}
+          {/* {threads.map((thread) => (
             <ThreadCard
               key={thread.id}
               id={thread.id}
@@ -126,7 +163,7 @@ export default function RoomPage({ params }) {
               created_by={thread.created_by['username'] || thread.created_by}
               basepath={"/rooms"}
             />
-          ))}
+          ))} */}
         </div>
       </div>
 
@@ -134,6 +171,9 @@ export default function RoomPage({ params }) {
       {isPopupOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+            {threadexists && (
+              <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+            )}
             <h3 className="text-xl font-bold mb-4">Create a New Thread</h3>
             <input
               type="text"

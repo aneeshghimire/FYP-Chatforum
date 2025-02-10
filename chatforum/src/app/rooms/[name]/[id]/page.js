@@ -314,7 +314,7 @@ export default function ChatRoom({ params }) {
 
   const formatDate = (dateAdded) => {
     try {
-      const date = new Date(dateAdded);  // Use the passed date string directly
+      const date = new Date(dateAdded);
       const today = new Date();
 
       const isToday =
@@ -358,15 +358,15 @@ export default function ChatRoom({ params }) {
           }
           {/* Back to Previous page */}
           <button
-            onClick={() => router.back()} // ✅ Works like browser back button
+            onClick={() => router.back()} // 
             className="text-blue-600 hover:text-blue-700 font-semibold border border-blue-600 px-4 py-2 rounded"
           >
             Back to Previous Page
           </button>
           {/* Leave Chat */}
-          <button className="text-red-600 hover:text-red-700 font-semibold border border-red-600 px-4 py-2 rounded">
+          {/* <button className="text-red-600 hover:text-red-700 font-semibold border border-red-600 px-4 py-2 rounded">
             Leave Chat
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -383,20 +383,24 @@ export default function ChatRoom({ params }) {
             {message.content && (
               <div className="flex items-center space-x-4">
                 {/* Upvote Section */}
-                <div className="flex flex-col items-center space-y-2 bg-gray-50 py-1 px-1 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-                  <div className="flex flex-col justify-center items-center">
-                    {message.upvote}
-                    <CiSquareChevUp
-                      className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer transition-transform transform hover:scale-110"
-                      onClick={() => handleUpvote(message.id)}
-                    />
-                    <CiSquareChevDown
-                      className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer transition-transform transform hover:scale-110"
-                      onClick={() => handleDownvote(message.id)}
-                    />
-                    {message.downvote}
+                {!message.isUser && (
+                  <div className="flex flex-col items-center space-y-2 bg-gray-50 py-1 px-1 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    <div className="flex flex-col justify-center items-center">
+                      {message.upvote}
+                      <CiSquareChevUp
+                        className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer transition-transform transform hover:scale-110"
+                        onClick={() => handleUpvote(message.id)}
+                      />
+                      <CiSquareChevDown
+                        className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer transition-transform transform hover:scale-110"
+                        onClick={() => handleDownvote(message.id)}
+                      />
+                      {message.downvote}
+                    </div>
                   </div>
-                </div>
+                )
+                }
+
 
                 {/* Conditional Rendering: Either message content or the edit input */}
                 {editingMessageId === message.id ? (

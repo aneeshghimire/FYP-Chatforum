@@ -18,4 +18,5 @@ urlpatterns = [
     path('getCreatedThreads/',views.getCreatedThreads,name='getCreatedThreads'),
     path('getrelatedthreads/<str:room_name>/',views.getrelatedthreads,name="getrelatedthreads"),
     path('getallthreads/',views.getallthreads,name="getallthreads"),
+    path('getadminthreads/',views.getadminthreads,name="getadminthreads"),
 ]   

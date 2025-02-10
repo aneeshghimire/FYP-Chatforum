@@ -41,7 +41,7 @@ export default function AdminPanel() {
                     <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-3xl shadow-md mb-8">
                         <div className="flex items-center space-x-4 md:space-x-6">
                             <img
-                                src={profileUrl}
+                                src={profileUrl ? profileUrl : "/noprofileimage/npc.png"}
                                 className="rounded-full shadow-gray-600 shadow-lg w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40"
                                 alt="Profile"
                             />
@@ -63,24 +63,21 @@ export default function AdminPanel() {
                     </div>
 
                     {/* Stats Section */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-center text-white">
-                            <h3 className="text-3xl md:text-4xl font-bold">94</h3>
-                            <p className="mt-2 text-sm md:text-base">Threads Joined</p>
-                        </div>
+                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-center text-white">
-                            <h3 className="text-3xl md:text-4xl font-bold">512</h3>
-                            <p className="mt-2 text-sm md:text-base">Contributions</p>
+                            <h3 className="text-3xl md:text-4xl font-bold">5</h3>
+                            <p className="mt-2 text-sm md:text-base">Total Rooms</p>
                         </div>
                         <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-2xl shadow-lg text-center text-white">
                             <h3 className="text-3xl md:text-4xl font-bold">10</h3>
-                            <p className="mt-2 text-sm md:text-base">Total Rooms</p>
+                            <p className="mt-2 text-sm md:text-base">Total Threads</p>
                         </div>
                         <div className="bg-gradient-to-r from-green-500 to-blue-500 p-6 rounded-2xl shadow-lg text-center text-white">
                             <h3 className="text-3xl md:text-4xl font-bold">10</h3>
                             <p className="mt-2 text-sm md:text-base">Total Users</p>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Actions Section */}
                     <div className="mt-8">
@@ -95,17 +92,18 @@ export default function AdminPanel() {
                                 <h3 className="text-2xl md:text-3xl font-bold">View Rooms</h3>
                             </div>
                             <div
+                                onClick={() => router.push("/threadstats")}
+                                className="cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-2xl shadow-lg text-center text-white hover:shadow-xl transition-all"
+                            >
+                                <h3 className="text-2xl md:text-3xl font-bold">View Threads</h3>
+                            </div>
+                            <div
                                 onClick={() => router.push("/userstats")}
                                 className="cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-center text-white hover:shadow-xl transition-all"
                             >
                                 <h3 className="text-2xl md:text-3xl font-bold">View Users</h3>
                             </div>
-                            <div
-                                onClick={() => router.push("/threads")}
-                                className="cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-2xl shadow-lg text-center text-white hover:shadow-xl transition-all"
-                            >
-                                <h3 className="text-2xl md:text-3xl font-bold">Joined Threads</h3>
-                            </div>
+
                         </div>
                     </div>
 

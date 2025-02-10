@@ -6,9 +6,16 @@ import React from 'react'
 
 export default function Roomcard({ name, description }) {
     const router = useRouter()
+    const maxDescriptionLength = 35;
+
+    const truncatedDescription =
+        description.length > maxDescriptionLength
+            ? description.slice(0, maxDescriptionLength) + '...'
+            : description;
     const joinroom = async () => {
         const csrftoken = await getcsrftoken()
-        const room_name = name;
+        const room_name = encodeURIComponent(name);
+        console.log("Encoded Room Name:", room_name);
         try {
             const response = await axios.get(`http://localhost:8000/api/${room_name}/joinroom/`,
                 {
@@ -19,7 +26,7 @@ export default function Roomcard({ name, description }) {
                 }
             );
             if (response.data.status == "successful") {
-                router.push(`/rooms/${name}`)
+                router.push(`/rooms/${room_name}`)
             }
         } catch (err) {
             console.log(err.message);
@@ -32,7 +39,7 @@ export default function Roomcard({ name, description }) {
                 {name}
             </h3>
             <p className="text-sm mb-4 text-gray-200 group-hover:text-white">
-                {description}
+                {truncatedDescription}
             </p>
             <button className="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium transition duration-300 ease-in-out transform hover:bg-indigo-500 hover:text-white hover:scale-105" onClick={joinroom}>Join Room</button>
         </div>

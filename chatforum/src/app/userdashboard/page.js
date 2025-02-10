@@ -33,7 +33,9 @@ export default function UserDashboard() {
         withCredentials: true,
       }
     );
-    setProfileUrl(response.data.profile.profile_picture_url);
+    if (response.data.profile && response.data.profile.profile_picture_url) {
+      setProfileUrl(response.data.profile.profile_picture_url);
+    }
     setProfileDetails(response.data.user);
   };
 
@@ -66,10 +68,11 @@ export default function UserDashboard() {
         }, withCredentials: true,
       }
     )
+    if (response.data.message == "No Rooms") {
+      setJoinedRoomsLength(0)
+    }
     if (response.data && response.data.data && Array.isArray(response.data.data)) {
       setJoinedRoomsLength(response.data.data.length);
-    } else {
-      setJoinedThreadsLength(0)
     }
   }
   const getCreatedThreads = async () => {
@@ -107,7 +110,7 @@ export default function UserDashboard() {
           <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-3xl shadow-md mb-8">
             <div className="flex items-center space-x-4 md:space-x-6">
               <img
-                src={profileUrl}
+                src={profileUrl ? profileUrl : "/noprofileimage/npc.png"}
                 className="rounded-full shadow-gray-600 shadow-lg w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40"
                 alt="Profile"
               />
@@ -118,17 +121,14 @@ export default function UserDashboard() {
                 <p className="text-gray-500">
                   Welcome back! Here’s your activity overview.
                 </p>
-                <button className="px-4 py-2 my-2 text-white rounded-lg shadow-md bg-indigo-600  hover:bg-indigo-700 transition">
-                  <Link href="/userprofile">
-                    Edit Profile
-                  </Link>
-                </button>
+
               </div>
             </div>
             <div className="mt-4 md:mt-0">
-              <button className="px-4 py-2 md:px-6 md:py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center justify-between">
-                <IoIosNotifications className="text-xl" /> View Latest
-                Notifications
+              <button className="px-4 py-2 my-2 text-white rounded-lg shadow-md bg-indigo-600  hover:bg-indigo-700 transition">
+                <Link href="/userprofile">
+                  Edit Profile
+                </Link>
               </button>
             </div>
           </div>

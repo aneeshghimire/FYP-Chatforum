@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import re
 from numpy.linalg import norm
-
+from urllib.parse import unquote
 @api_view(['GET'])
 def getavailablerooms(request):
     rooms=Room.objects.all()
@@ -41,12 +41,15 @@ def getthreads(request, room_name):
 
 @api_view(['GET'])
 def joinroom(request,room_name):
-    room= Room.objects.get(name=room_name)
+    decoded_room_name = unquote(room_name)
+    print("Decoded room name: "+ decoded_room_name)
+    room= Room.objects.get(name=decoded_room_name)
     user= request.user
     if user.is_authenticated:
         room.users.add(user)
         return JsonResponse({"status":"successful","message":"Room joined successfully"})
     return JsonResponse({"status":"error","message":"Cannot join the room"})
+
 
 
 @api_view(['POST'])
@@ -55,7 +58,11 @@ def addthreads(request,room_name):
         room =Room.objects.get(name=room_name)
         user= request.user
         title= request.data["title"]
+        checkthread = Thread.objects.filter(room=room,title__iexact=title)
         if room and user and title:  
+            if checkthread.exists():
+                existingthread = ThreadSerializer(checkthread,many=True)
+                return JsonResponse({"status":"Unsuccessful","message":"Thread exists","data":existingthread.data})
             Thread.objects.create(room=room, title=title, created_by=user)
             return JsonResponse({"status":"successful","message":"Updated Sucessfully"})
         return JsonResponse({"status":"error","message":"Invalid Data"})
@@ -234,36 +241,67 @@ def getrelatedthreads(request, room_name):
     print(matching_threads)
     return JsonResponse({'matching_threads': matching_threads})
 
+@api_view(['GET'])
+def getadminthreads(request):
+    try:
+        threads = Thread.objects.all()
+        if(not threads):
+            return JsonResponse({'status':'error','message':'Threads doesnt exist'})
+        serializer = ThreadSerializer(threads,many=True)
+        return JsonResponse({'status':'successful','threads':serializer.data})
+    except ObjectDoesNotExist: 
+        return JsonResponse({"status": "error", "message": "Failed"}, status=404)
+
 @api_view(['POST'])
 def getallthreads(request):
-    query= request.data.get("query")
-    print(query)
-    tokens=tokenizequery(query)
-    embeddings= loadembeddings(r"E:\college\7thsem\FYP\ML\word_embeddings.csv")
+    query = request.data.get("query")
+    print("Query:", query)
+    
+    tokens = tokenizequery(query)
+    embeddings = loadembeddings(r"E:\college\7thsem\FYP\ML\word_embeddings.csv")
+    
     related_words = set()
+    similarity_map = {}
+
     for token in tokens:
-        related_words.update(find_similar_words(token, embeddings))
-    threads = Thread.objects.all().values('id','title','created_by__username','room__name','room')
-    thread_data = [{'title': thread['title'],'id':thread['id'],'created_by':thread["created_by__username"],'roomid':thread['room'],'roomname':thread['room__name']} for thread in threads]
-    matching_threads = search_threads_by_words(related_words, thread_data)
+        words, similarities = find_similar_words(token, embeddings)
+        related_words.update(words)
+        for word, similarity in zip(words, similarities):
+            similarity_map[word] = similarity
+
+    threads = Thread.objects.all().values('id', 'title', 'created_by__username', 'room__name', 'room')
+    thread_data = [
+        {
+            'title': thread['title'],
+            'id': thread['id'],
+            'created_by': thread["created_by__username"],
+            'roomid': thread['room'],
+            'roomname': thread['room__name']
+        }
+        for thread in threads
+    ]
+
+    matching_threads_with_scores = search_threads_by_words(related_words, thread_data, similarity_map)
+
     print("****************************************************************")
-    print( matching_threads)
-    return JsonResponse({'matching_threads': matching_threads})
+    print(matching_threads_with_scores)
+
+    return JsonResponse({'threads': matching_threads_with_scores})
+
 
 def loadembeddings(filepath):
-   df= pd.read_csv(filepath)
-   embeddings={row['Word']:np.array(row[1:],dtype=float) for _,row in df.iterrows()}
-   return embeddings
+    df = pd.read_csv(filepath)
+    embeddings = {row['Word']: np.array(row[1:], dtype=float) for _, row in df.iterrows()}
+    return embeddings
 
-def findrelatedthreads():
-    pass
 
 def tokenizequery(query):
-    tokens = re.findall(r'\b\w+\b', query.lower())
-    return tokens
+    return re.findall(r'\b\w+\b', query.lower())
+
 
 def cosine_similarity(vec1, vec2):
     return np.dot(vec1, vec2) / (norm(vec1) * norm(vec2))
+
 
 def find_similar_words(word, embeddings, top_n=30):
     word_vector = embeddings.get(word)
@@ -271,22 +309,34 @@ def find_similar_words(word, embeddings, top_n=30):
         return []
 
     similar_words = []
+    
     for vocab_word, vocab_vector in embeddings.items():
         similarity = cosine_similarity(word_vector, vocab_vector)
         similar_words.append((vocab_word, similarity))
-
+    
     # Sort by similarity and return the top N similar words
     similar_words.sort(key=lambda x: x[1], reverse=True)
-    return [w for w, _ in similar_words[:top_n]]
+    
+    return [w for w, _ in similar_words[:top_n]], [s for _, s in similar_words[:top_n]]
 
-def search_threads_by_words(words, thread_data):
-    # Find threads containing at least one of the related words
-    print(words)
+
+def search_threads_by_words(related_words, thread_data, similarity_map):
+    print(related_words)
     matching_threads = []
+
     for thread in thread_data:
-        for word in words:
-            if word in thread['title'].lower():
-                matching_threads.append(thread)
-                break  # No need to check more words for this thread
+        thread_title_words = set(tokenizequery(thread["title"]))
+        matched_words = related_words.intersection(thread_title_words)
+
+        if matched_words:
+            # Find the highest similarity score among matched words
+            highest_similarity = max(similarity_map[word] for word in matched_words)
+            
+            # Include the thread directly in the result with its similarity score
+            thread_with_score = {**thread, "similarity_score": highest_similarity}
+            matching_threads.append(thread_with_score)
+
+    # Sort by similarity score in descending order
+    matching_threads.sort(key=lambda x: x["similarity_score"], reverse=True)
 
     return matching_threads

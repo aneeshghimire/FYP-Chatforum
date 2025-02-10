@@ -18,7 +18,7 @@ export default function CreatedThreads() {
     const csrftoken = await getcsrftoken()
     const response = await axios.get("http://localhost:8000/api/getCreatedThreads/", {
       headers: {
-        "X-CSRFToken": csrftoken.value, // Include the CSRF token in the request headers
+        "X-CSRFToken": csrftoken.value,
       },
       withCredentials: true,
     })
@@ -81,9 +81,9 @@ export default function CreatedThreads() {
   return (
     <Layout>
       <div className="container mx-auto mt-8">
-        <h1 className="text-3xl font-bold mb-4">Created Threads</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center">Created Threads</h1>
         {createdThreads && createdThreads.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-4 px-9">
             {createdThreads.map((thread) => (
               <ThreadCard
                 key={thread.id}

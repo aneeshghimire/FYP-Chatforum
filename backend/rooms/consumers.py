@@ -10,7 +10,7 @@ from django.conf import settings
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.thread_id = self.scope['url_route']['kwargs']['thread_id']
-        self.room_name = f'chat_{self.thread_id}'
+        self.room_name = f'{self.thread_id}'
         print(f"Connecting to room: {self.room_name}") 
         self.user = self.scope['user']
         if self.user.is_authenticated:
@@ -62,7 +62,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Handle text messages
             if message_type == 'newtext':
                 message_content = text_data_json.get('content', "")
-                print(message_content)
+                print("This is message: "+message_content)
                 # Save the text message to the database
                 message_id,date_added=await self.save_message(sender, message_content, roomname)
                 

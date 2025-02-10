@@ -7,30 +7,39 @@ import getcsrftoken from "@/helpers/getcsrftoken";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { Discuss } from 'react-loader-spinner'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+
+const signupSchema = z.object({
+  username: z.string().min(3, "Username must be at least 5 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(3, "Password must be at least 3 characters"),
+});
 
 export default function Userform() {
   const router = useRouter()
-  const [userDetails, setUserDetails] = useState({
-    username: "",
-    email: "",
-    password: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(signupSchema),
   });
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleChange = (e) => {
-    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
-  };
+  // const handleChange = (e) => {
+  //   setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+  // };
 
-  const handleSubmit = async (e) => {
-
-    e.preventDefault();
+  const onSubmit = async (data) => {
 
     try {
       setIsLoading(true)
       let csrftoken = await getcsrftoken()
       const response = await axios.post(
         "http://localhost:8000/api/register/",
-        userDetails,
+        data
       );
       if (response.data.message == 'Email Already Exists') {
         setIsLoading(false)
@@ -89,39 +98,42 @@ export default function Userform() {
         <p className="text-center text-gray-500 mb-8">
           Connect, Share, and Engage with the Community!
         </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label className="block text-gray-700 font-medium">Username</label>
             <input
               type="text"
-              name="username"
-              value={userDetails.username}
-              onChange={handleChange}
+              {...register("username")}
+              // onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-              required
             />
+            {errors.username && (
+              <p className="text-red-500 text-sm">{errors.username.message}</p>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 font-medium">Email</label>
             <input
               type="email"
-              name="email"
-              value={userDetails.email}
-              onChange={handleChange}
+              {...register("email")}
+              // onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-              required
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 font-medium">Password</label>
             <input
               type="password"
-              name="password"
-              value={userDetails.password}
-              onChange={handleChange}
+              {...register("password")}
+              // onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-              required
             />
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
           </div>
           <button
             type="submit"
@@ -135,12 +147,6 @@ export default function Userform() {
           Already have an account? {" "}
           <Link href="/login" className="text-purple-700 hover:underline">
             Log In
-          </Link>
-        </div>
-        <div className="mt-6 text-center text-gray-600">
-          Admin?{" "}
-          <Link href="/admin" className="text-purple-700 hover:underline">
-            Log In As Admin
           </Link>
         </div>
       </div>
