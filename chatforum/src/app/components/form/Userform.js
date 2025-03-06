@@ -12,7 +12,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 
 const signupSchema = z.object({
-  username: z.string().min(3, "Username must be at least 5 characters"),
+  username: z.string()
+    .min(3, "Username must be at least 5 characters")
+    .regex(/^\S+$/, "Username cannot contain spaces"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(3, "Password must be at least 3 characters"),
 });

@@ -265,6 +265,8 @@ def getallthreads(request):
 
     for token in tokens:
         words, similarities = find_similar_words(token, embeddings)
+        if(len(words)==0):
+            return JsonResponse({'status':'Failed','message':'No matching words'})
         related_words.update(words)
         for word, similarity in zip(words, similarities):
             similarity_map[word] = similarity
@@ -306,7 +308,7 @@ def cosine_similarity(vec1, vec2):
 def find_similar_words(word, embeddings, top_n=30):
     word_vector = embeddings.get(word)
     if word_vector is None:
-        return []
+        return [],[]
 
     similar_words = []
     
@@ -316,6 +318,8 @@ def find_similar_words(word, embeddings, top_n=30):
     
     # Sort by similarity and return the top N similar words
     similar_words.sort(key=lambda x: x[1], reverse=True)
+    if len(similar_words)==0:
+        return [], []  # In case no similar words were found
     
     return [w for w, _ in similar_words[:top_n]], [s for _, s in similar_words[:top_n]]
 

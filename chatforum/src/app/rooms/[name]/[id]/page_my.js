@@ -3,7 +3,7 @@ import getcsrftoken from "@/helpers/getcsrftoken";
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 import { CiSquareChevUp, CiSquareChevDown, CiEdit, CiImageOn } from "react-icons/ci";
 import { CgClose } from "react-icons/cg";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 export default function ChatRoom({ params }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const roomname = searchParams.get("roomname");
   const [messages, setMessages] = useState([]);
@@ -24,7 +25,7 @@ export default function ChatRoom({ params }) {
   const [newMessage, setNewMessage] = useState("");
   const [images, setNewImages] = useState([]);
   const [previewUrls, setNewPreviewUrls] = useState([]);
-  const [editingMessageId, setEditingMessageId] = useState(null); // State to track which message is being edited
+  const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedContent, setEditedContent] = useState("");
   const [hasNext, setHasNext] = useState("")
   const [currentPageNumber, setCurrentPageNumber] = useState(1)
@@ -93,28 +94,17 @@ export default function ChatRoom({ params }) {
       }
     }, 2000);
   };
-  const getMessages = async (reload) => {
+  const getMessages = async () => {
     const csrftoken = await getcsrftoken()
-    let messagesResponse
-    if (reload) {
-      messagesResponse = await axios.get(
-        `http://localhost:8000/api/getMessages/${threadId}/?page=${currentPageNumber - 1}`,
-        {
-          headers: { "X-CSRFToken": csrftoken.value },
-          withCredentials: true,
-        }
-      );
-    } else {
-      messagesResponse = await axios.get(
-        `http://localhost:8000/api/getMessages/${threadId}/?page=${currentPageNumber}`,
-        {
-          headers: { "X-CSRFToken": csrftoken.value },
-          withCredentials: true,
-        }
-      );
-      setCurrentPageNumber((prev) => prev + 1)
-    }
+    const messagesResponse = await axios.get(
+      `http://localhost:8000/api/getMessages/${threadId}/?page=${currentPageNumber}`,
+      {
+        headers: { "X-CSRFToken": csrftoken.value },
+        withCredentials: true,
+      }
+    );
     console.log(messagesResponse.data);
+    setCurrentPageNumber((prev) => prev + 1)
 
     setHasNext(messagesResponse.data.has_next)
     if (
@@ -125,21 +115,15 @@ export default function ChatRoom({ params }) {
         message.isUser = message.user.username === userref.current.username;
       });
       const reversedMessages = [...messagesResponse.data.message].reverse();
-      console.log(reversedMessages)
-      if (reload) {
-        setMessages((prevMessages) => {
-          const oldMessages = prevMessages.filter(
-            (prevMessage) =>
-              !reversedMessages.some(
-                (newMessage) => newMessage.id === prevMessage.id
-              )
-          );
-          return [...reversedMessages, ...oldMessages];
-        });
-        // setMessages(reversedMessages)
-      } else {
-        setMessages((prevMessages) => [...reversedMessages, ...prevMessages])
-      }
+      setMessages((prevMessages) => {
+        const newMessages = reversedMessages.filter(
+          (newMessage) =>
+            !prevMessages.some(
+              (prevMessage) => prevMessage.id === newMessage.id
+            )
+        );
+        return [...newMessages, ...prevMessages];
+      });
     }
 
   }
@@ -165,7 +149,7 @@ export default function ChatRoom({ params }) {
       userref.current = userProfile.data.user;
       console.log("User profile fetched");
 
-      getMessages(false)
+      getMessages()
       if (!socketRef.current) {
         console.log(`Setting up WebSocket for threadId: ${threadId}`);
         socketRef.current = new WebSocket(
@@ -274,10 +258,13 @@ export default function ChatRoom({ params }) {
     )
     console.log(response.data)
     if (response.data.status == "successful") {
-      getMessages(true)
-    }
-
-    else if (response.data.status == "error") {
+      // Find the message and decrement the downvote
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageid ? { ...msg, downvote: msg.downvote + 1 } : msg
+        )
+      )
+    } else if (response.data.status == "error") {
       toast.error("You already upvoted this message", {
         position: "top-right",
         autoClose: 5000,
@@ -299,10 +286,13 @@ export default function ChatRoom({ params }) {
     )
     console.log(response.data)
     if (response.data.status == "successful") {
-      getMessages(true)
-    }
-
-    else if (response.data.status == "error") {
+      // Find the message and decrement the downvote
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageid ? { ...msg, downvote: msg.downvote + 1 } : msg
+        )
+      )
+    } else if (response.data.status == "error") {
       toast.error("You already downvoted this message", {
         position: "top-right",
         autoClose: 5000,
@@ -315,10 +305,6 @@ export default function ChatRoom({ params }) {
 
   }
   const handleSaveEdit = (messageID) => {
-    if (editedContent.length == 0) {
-      alert("Message cannot be empty")
-      return;
-    }
     if (
       socketRef.current &&
       socketRef.current.readyState === WebSocket.OPEN
@@ -329,11 +315,12 @@ export default function ChatRoom({ params }) {
     }
     setEditingMessageId(null);
     setEditedContent('');
+    getMessages();
   }
 
   const formatDate = (dateAdded) => {
     try {
-      const date = new Date(dateAdded);  // Use the passed date string directly
+      const date = new Date(dateAdded);
       const today = new Date();
 
       const isToday =
@@ -362,29 +349,35 @@ export default function ChatRoom({ params }) {
 
       </div>
       {/* Chat Header */}
-      <div className="bg-white p-6 shadow-md flex justify-between items-center">
+      <div className="bg-white p-6 shadow-md fixed w-full z-50 flex top-0 justify-between items-center">
         <h2 className="text-xl font-bold">{roomname}</h2>
-        <Link href={`/upvote/${params.id}`} className="border border-gray-700 px-5 py-2 rounded-md uppercase text-gray-800 font-semibold ">See the most upvoted messages</Link>
+        <Link href={`/upvote/${params.id}`} className="border border-purple-700 px-5 py-3 rounded-xl uppercase text-purple-800 font-semibold ">See the most upvoted messages</Link>
 
         {/* Right-aligned buttons */}
         <div className="flex space-x-4">
 
           {/* Back to Threadroom */}
           {hasNext &&
-            <button className="text-gray-800 hover:text-gray-700 font-semibold border border-gray-600 px-4 py-2 rounded" onClick={() => { getMessages(false) }}>
+            <button className="text-blue-600 hover:text-blue-700 font-semibold border border-blue-600 px-4 py-2 rounded" onClick={getMessages}>
               See more messages
             </button>
           }
-          {/* Back to Threadroom */}
-          <Link href={`/rooms/${roomname}`} className="text-gray-600 hover:text-gray-700 font-semibold border border-gray-600 px-4 py-2 rounded">
-            Back to Threadroom
-          </Link>
-
+          {/* Back to Previous page */}
+          <button
+            onClick={() => router.back()} // 
+            className="text-blue-600 hover:text-blue-700 font-semibold border border-blue-600 px-4 py-2 rounded"
+          >
+            Back to Previous Page
+          </button>
+          {/* Leave Chat */}
+          {/* <button className="text-red-600 hover:text-red-700 font-semibold border border-red-600 px-4 py-2 rounded">
+            Leave Chat
+          </button> */}
         </div>
       </div>
 
       {/* Chat Messages (Scrollable) */}
-      <div className="flex-1 overflow-y-auto p-6 mb-20">
+      <div className="flex-1 overflow-y-auto p-6 mb-20 pt-[96px]">
         {" "}
         {messages.map((message, index) => (
           <div
@@ -398,10 +391,8 @@ export default function ChatRoom({ params }) {
                 {/* Upvote Section */}
                 {!message.isUser && (
                   <div className="flex flex-col items-center space-y-2 bg-gray-50 py-1 px-1 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-
                     <div className="flex flex-col justify-center items-center">
                       {message.upvote}
-
                       <CiSquareChevUp
                         className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer transition-transform transform hover:scale-110"
                         onClick={() => handleUpvote(message.id)}
@@ -415,6 +406,7 @@ export default function ChatRoom({ params }) {
                   </div>
                 )
                 }
+
 
                 {/* Conditional Rendering: Either message content or the edit input */}
                 {editingMessageId === message.id ? (
@@ -443,12 +435,12 @@ export default function ChatRoom({ params }) {
                 ) : (
                   // When not in edit mode, show the message content
                   <div
-                    className={`p-6 rounded-lg max-w-2xl break-words shadow-xl transition-transform duration-300 ${message.isUser ? "bg-blue-800 text-white" : "bg-gray-100 text-gray-800"
+                    className={`p-6 rounded-lg max-w-2xl break-words shadow-xl transition-transform duration-300 test ${message.isUser ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-800"
                       }`}
                   >
                     <p className="font-semibold text-sm ">{message.sender ? message.sender : message.user.username}</p>
                     <div className="relative group inline-block">
-                      <p className="text-lg">
+                      <p className="text-lg for-testing">
                         {message.content}
                       </p>
                       {/* Tooltip */}
@@ -514,7 +506,7 @@ export default function ChatRoom({ params }) {
             onKeyDown={handleTyping}
             placeholder="Type your message..."
             rows={1}
-            className="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none"
+            className="w-full p-2 border test-message-area border-gray-300 rounded-lg resize-none focus:outline-none"
           />
         </div>
 
@@ -535,7 +527,7 @@ export default function ChatRoom({ params }) {
         </div>
         <button
           onClick={handleSendMessage}
-          className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+          className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition test-send"
         >
           Send
         </button>

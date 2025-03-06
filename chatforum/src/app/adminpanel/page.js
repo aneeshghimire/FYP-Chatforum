@@ -54,12 +54,7 @@ export default function AdminPanel() {
                                 </p>
                             </div>
                         </div>
-                        <div className="mt-4 md:mt-0">
-                            <button className="px-4 py-2 md:px-6 md:py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center justify-between">
-                                <IoIosNotifications className="text-xl" /> View Latest
-                                Notifications
-                            </button>
-                        </div>
+
                     </div>
 
                     {/* Stats Section */}

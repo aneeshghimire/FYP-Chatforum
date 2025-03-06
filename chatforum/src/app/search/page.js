@@ -30,8 +30,8 @@ export default function Room() {
                 headers: { "X-CSRFToken": csrftoken.value },
                 withCredentials: true,
             })
-            console.log(response.data.threads)
-            console.log(response.data)
+            // console.log(response.data.threads)
+            // console.log(response.data)
             setThreads(response.data.threads)
         } catch (err) {
             console.log(err)
@@ -58,25 +58,28 @@ export default function Room() {
 
                 {isLoading && <MagnifyingGlass />}
                 <div className="space-y-4 mt-10">
-                    {threads.map((thread) => (
-                        <div key={thread.id} className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-
-                            <p className="text-sm text-gray-600 font-semibold">
-                                Room: {thread.roomname}
-                            </p>
-                            <ThreadCard
-                                id={thread.id}
-                                title={thread.title}
-                                description={thread.description}
-                                roomname={thread.roomname}
-                                created_by={thread.created_by['username'] || thread.created_by}
-                                basepath={"/rooms"}
-                            />
-                            <p className="text-sm text-gray-600 font-semibold">
-                                Similarity Score: {thread.similarity_score.toFixed(2)}
-                            </p>
-                        </div>
-                    ))}
+                    {threads && threads.length > 0 ? (
+                        threads.map((thread) => (
+                            <div key={thread.id} className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                                <p className="text-sm text-gray-600 font-semibold">
+                                    Room: {thread.roomname}
+                                </p>
+                                <ThreadCard
+                                    id={thread.id}
+                                    title={thread.title}
+                                    description={thread.description}
+                                    roomname={thread.roomname}
+                                    created_by={thread.created_by['username'] || thread.created_by}
+                                    basepath={"/rooms"}
+                                />
+                                <p className="text-sm text-gray-600 font-semibold">
+                                    Similarity Score: {thread.similarity_score.toFixed(2)}
+                                </p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center text-gray-500">No threads found</p>
+                    )}
                 </div>
 
 
