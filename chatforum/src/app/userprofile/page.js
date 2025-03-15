@@ -15,7 +15,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Separate schemas for username and password validation
 const usernameSchema = z.object({
-    username: z.string().min(5, "Username must be atleast 5 characters").max(100, "Username is too long"),
+    username: z.string().min(5, "Username must be atleast 5 characters")
+        .regex(/^\S+$/, "Username cannot contain spaces")
+        .max(100, "Username is too long"),
 });
 
 const passwordSchema = z.object({
